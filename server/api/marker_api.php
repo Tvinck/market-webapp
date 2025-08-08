@@ -1,5 +1,13 @@
 <?php
-header('Access-Control-Allow-Origin: https://www.bazzarproject.ru');
+$config = @include __DIR__ . '/../config.php';
+$allowed = $config['allowed_origins'] ?? [];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin && (empty($allowed) || in_array($origin, $allowed, true))) {
+  header("Access-Control-Allow-Origin: $origin");
+} elseif (!empty($allowed)) {
+  http_response_code(403);
+  exit;
+}
 header('Access-Control-Allow-Methods: GET,POST,OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
