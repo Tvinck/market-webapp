@@ -7,9 +7,37 @@
 ## Установка
 
 1. Установите PHP и клонируйте репозиторий.
-2. Укажите URL Google Apps Script в переменной окружения `MARKER_GAS_ENDPOINT` или задайте `gas_endpoint` в `server/config.php`.
-3. При необходимости задайте переменную `MARKER_ALLOWED_ORIGINS` со списком разрешённых Origin.
-4. Запустите сервер, например: `php -S localhost:8000 -t server`.
+2. Получите ключ [Yandex Maps API](https://developer.tech.yandex.ru/) и замените `YOUR_YANDEX_API_KEY` в теге подключения карт в `index.html`.
+3. Разверните Google Apps Script:
+   - откройте <https://script.google.com/>, создайте новый проект и вставьте содержимое `code.gs`;
+   - задайте `PHOTOS_FOLDER_ID` (ID папки Google Drive для загрузок) и при необходимости `SPREADSHEET_ID`;
+   - через меню **Deploy → New deployment → Web app** получите URL веб‑приложения.
+4. Укажите полученный URL в `window.MARKER_CONFIG.GAS_ENDPOINT` или пропишите `gas_endpoint` в `server/config.php` для прокси `server/api/marker_api.php`.
+5. В `server/config.php` задайте `PHOTOS_FOLDER_ID` и список `MARKER_ALLOWED_ORIGINS` (можно через одноимённые переменные окружения).
+6. Запустите сервер, например: `php -S localhost:8000 -t server`.
+
+### Примеры конфигурации и деплоя
+
+`server/config.php`:
+
+```php
+<?php
+return [
+    'gas_endpoint' => 'https://script.google.com/macros/s/XXXXXXXX/exec',
+    'photos_folder_id' => '1AbCDeFgHiJ',
+    'allowed_origins' => ['https://example.com']
+];
+```
+
+Команды:
+
+```
+export MARKER_GAS_ENDPOINT="https://script.google.com/macros/s/XXXXXXXX/exec"
+export PHOTOS_FOLDER_ID="1AbCDeFgHiJ"
+export MARKER_ALLOWED_ORIGINS="https://example.com,https://example.org"
+php -S localhost:8000 -t server
+RSYNC_DEST=user@host:/var/www/marker-webapp ./deploy.sh
+```
 
 ## Серверное API
 
