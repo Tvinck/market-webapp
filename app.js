@@ -7,6 +7,15 @@
   const $ = (sel) => document.querySelector(sel);
   const on = (el, ev, fn, opts) => { if (el) el.addEventListener(ev, fn, opts||false); };
 
+  const escapeHtml = (text) =>
+    (text || "").replace(/[&<>"']/g, c => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[c]);
+
   const els = {
     tabs: {
       map: $("#tab-map"),
@@ -96,7 +105,7 @@
   function markerBalloonHTML(m){
     const dateStr = m.created_at ? new Date(m.created_at).toLocaleString('ru-RU') : '';
     const author = m.is_anon ? 'Аноним' : (m.author || '?');
-    return `<div class="marker-card"><div>${(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div></div>`;
+    return `<div class="marker-card"><div>${escapeHtml(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div></div>`;
   }
 
   function setPreset(name){
@@ -511,7 +520,7 @@
         el.className = "card";
         el.innerHTML = `<div><strong>${t.title}</strong></div>
                         <div class="meta">${new Date(m.created_at).toLocaleString()} • ${m.author||'?'}</div>
-                        <div>${m.description||''}</div>`;
+                        <div>${escapeHtml(m.description||'')}</div>`;
         on(el, "click", ()=>{
           const btn = document.querySelector('[data-tab="map"]');
           if (btn) btn.click();
