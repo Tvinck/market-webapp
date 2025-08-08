@@ -81,6 +81,15 @@ export async function publishMarker(){
     let photoData = '';
     const file = window.els.photo?.files?.[0];
     if (file) {
+      const maxSize = 2 * 1024 * 1024; // 2 MB
+      if (file.size > maxSize) {
+        toast("Фото слишком большое (максимум 2 МБ)");
+        return;
+      }
+      if (file.type && !file.type.startsWith('image/')) {
+        toast("Можно прикрепить только изображение");
+        return;
+      }
       photoData = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
