@@ -105,7 +105,7 @@
   function markerBalloonHTML(m){
     const dateStr = m.created_at ? new Date(m.created_at).toLocaleString('ru-RU') : '';
     const author = m.is_anon ? 'Аноним' : (m.author || '?');
-    return `<div class="marker-card"><div>${escapeHtml(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div></div>`;
+    return `<div class="marker-card"><div>${escapeHtml(m.description||'')}</div><div class="meta">Создал: ${author}${dateStr ? ' • ' + dateStr : ''}</div></div>`;
   }
 
   function setPreset(name){
