@@ -1,6 +1,6 @@
 import { loadTheme, saveTheme, applyTheme } from './src/theme.js';
 import { loadMapPrefs, saveMapPrefs, markerIconFor, markerBalloonHTML, setPreset, highlightActivePreset, applyMapPrefs, markCustomIfTweaked } from './src/map.js';
-import { fetchMarkers, publishMarker } from './src/api.js';
+import { fetchMarkers, publishMarker, confirmMarker } from './src/api.js';
 import { toast, openModal, closeModal, showOnbIfNeeded, buildTypes, renderProfile, loadFeed } from './src/ui.js';
 
 const tg = window.Telegram?.WebApp;
@@ -32,6 +32,7 @@ const els = {
   zoomOut: $("#zoomOut"),
   miniZoom: $("#miniZoom"),
   fabAdd: $("#fabAdd"),
+  confirm: $("#confirm"),
   onb: $("#onb"),
   modal: $("#modal"),
   types: $("#types"),
@@ -68,6 +69,7 @@ window.TYPES = TYPES;
 window.map = null;
 window.userCoords = null;
 window.markersCollection = null;
+window.activeMarkerId = null;
 window.selectedType = null;
 window.pickedPoint = null;
 window.pickingMode = false;
@@ -114,6 +116,16 @@ function initMap(){
       if (els.coords) els.coords.textContent = window.pickedPoint.map(x=>x.toFixed(6)).join(", ");
       if (els.publish) els.publish.disabled = !window.selectedType || !window.pickedPoint;
     });
+
+    window.markersCollection.events.add("balloonopen", e => {
+      window.activeMarkerId = e.get('target').properties.get('marker_id');
+      if (els.confirm) els.confirm.classList.remove('hidden');
+    });
+
+    window.markersCollection.events.add("balloonclose", () => {
+      window.activeMarkerId = null;
+      if (els.confirm) els.confirm.classList.add('hidden');
+    });
   });
 }
 
@@ -131,6 +143,18 @@ els.navBtns.forEach(btn => {
 on(els.fabAdd, "click", openModal);
 on(els.cancel, "click", closeModal);
 on(els.publish, "click", publishMarker);
+on(els.confirm, "click", async ()=>{
+  if (!window.activeMarkerId) return;
+  els.confirm.disabled = true;
+  const res = await confirmMarker(window.activeMarkerId);
+  els.confirm.disabled = false;
+  if (res?.ok){
+    toast("Спасибо за подтверждение");
+    window.activeMarkerId = null;
+    els.confirm.classList.add('hidden');
+    fetchMarkers();
+  }
+});
 on(els.useHere, "click", ()=>{
   if (!window.map) return;
   window.pickedPoint = window.map.getCenter();

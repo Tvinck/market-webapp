@@ -23,7 +23,8 @@ export function markerIconFor(typeKey){
 export function markerBalloonHTML(m){
   const dateStr = m.created_at ? new Date(m.created_at).toLocaleString('ru-RU') : '';
   const author = m.is_anon ? 'Аноним' : (m.author || '?');
-  return `<div class="marker-card">${m.title ? `<div style="font-weight:600">${escapeHTML(m.title)}</div>` : ''}<div>${escapeHTML(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div></div>`;
+  const rating = Number(m.rating || 0);
+  return `<div class="marker-card">${m.title ? `<div style="font-weight:600">${escapeHTML(m.title)}</div>` : ''}<div>${escapeHTML(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div><div class="meta">Рейтинг: ${rating}</div></div>`;
 }
 
 export function setPreset(name){

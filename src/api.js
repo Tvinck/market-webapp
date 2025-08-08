@@ -28,7 +28,8 @@ export function renderMarkers(items){
     const pm = new ymaps.Placemark([m.lat, m.lng], {
       balloonContentHeader: `<strong>${t.title}</strong>`,
       balloonContentBody: markerBalloonHTML(m),
-      hintContent: t.title
+      hintContent: t.title,
+      marker_id: m.id
     }, markerIconFor(t.key));
     window.markersCollection.add(pm);
   });
@@ -124,5 +125,24 @@ export async function publishMarker(){
     if (optimisticPm) { try { window.markersCollection.remove(optimisticPm); } catch(_){ } }
   } finally {
     window.isPublishing = false;
+  }
+}
+
+export async function confirmMarker(id){
+  const ep = endpoint(); if (!ep) return toast("API не настроено");
+  try {
+    const url = new URL(ep); url.searchParams.set("action","confirm_marker");
+    const res = await fetch(url.toString(), {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ id })
+    });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    return data;
+  } catch(e){
+    console.error("confirmMarker", e);
+    toast("Не удалось подтвердить: " + (e?.message || e));
+    return { ok:false };
   }
 }
