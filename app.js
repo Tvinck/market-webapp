@@ -267,10 +267,14 @@
     const url = new URL(ep); url.searchParams.set("action","list_markers"); url.searchParams.set("lat",center[0]); url.searchParams.set("lng",center[1]); url.searchParams.set("radius",radius);
     try {
       const res = await fetch(url.toString(), { method:"GET" });
+      if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       renderMarkers(Array.isArray(data?.markers) ? data.markers : []);
       window.__markersCache = data.markers || [];
-    } catch(e){ console.error(e); toast("Не удалось загрузить метки"); }
+    } catch(e){
+      console.error("fetchMarkers", e);
+      toast("Не удалось загрузить метки: " + (e?.message || e));
+    }
   }
 
   function renderMarkers(items){
@@ -360,6 +364,7 @@
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify(payload)
       });
+      if (!res.ok) throw new Error(res.status);
       const data = await res.json();
 
       if (data?.ok){
@@ -371,8 +376,8 @@
         throw new Error("API error");
       }
     } catch(e){
-      console.error(e);
-      toast("Не удалось опубликовать");
+      console.error("publishMarker", e);
+      toast("Не удалось опубликовать: " + (e?.message || e));
       if (optimisticPm) { try { markersCollection.remove(optimisticPm); } catch(_){ } }
     } finally {
       isPublishing = false;
