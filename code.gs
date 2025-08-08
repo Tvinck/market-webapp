@@ -3,16 +3,23 @@ const SPREADSHEET_ID = '1kthJTm6r27LFQdqL2HvlWkhWFknZgH4YpUye3AbuR0U';
 const SHEET_MARKERS  = 'markers';
 const PHOTOS_FOLDER_ID = 'YOUR_PHOTOS_FOLDER_ID';
 
-function escapeHTML(text) {
-  return String(text || '').replace(/[&<>"']/g, function(c) {
-    return ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    })[c];
-  });
+let escapeHTML;
+try {
+  // CommonJS: load shared utility
+  escapeHTML = require('./src/utils.js').escapeHTML;
+} catch (e) {
+  // Fallback for direct Apps Script execution - keep in sync with src/utils.js
+  escapeHTML = function(text) {
+    return String(text || '').replace(/[&<>"']/g, function(c) {
+      return ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[c];
+    });
+  };
 }
 
 // Создать лист и заголовки (один раз)

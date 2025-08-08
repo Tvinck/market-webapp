@@ -2,6 +2,7 @@ import { loadTheme, saveTheme, applyTheme } from './src/theme.js';
 import { loadMapPrefs, saveMapPrefs, markerIconFor, markerBalloonHTML, setPreset, highlightActivePreset, applyMapPrefs, markCustomIfTweaked } from './src/map.js';
 import { fetchMarkers, publishMarker, confirmMarker } from './src/api.js';
 import { toast, openModal, closeModal, showOnbIfNeeded, buildTypes, renderProfile, loadFeed } from './src/ui.js';
+import { escapeHTML } from './src/utils.js';
 
 const tg = window.Telegram?.WebApp;
 if (tg) { try { tg.expand(); tg.MainButton.hide(); } catch(_){} }
@@ -9,14 +10,7 @@ window.tg = tg;
 
 const $ = (sel) => document.querySelector(sel);
 const on = (el, ev, fn, opts) => { if (el) el.addEventListener(ev, fn, opts||false); };
-window.escapeHTML = (text) =>
-  (text || "").replace(/[&<>"']/g, c => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[c]);
+window.escapeHTML = escapeHTML;
 
 const els = {
   tabs: {

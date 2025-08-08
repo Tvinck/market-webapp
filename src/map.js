@@ -1,3 +1,5 @@
+import { escapeHTML } from './utils.js';
+
 export function loadMapPrefs(){
   try { return JSON.parse(localStorage.getItem("map_prefs_v2")) || { type: "yandex#map", traffic: false, preset: "standard" }; }
   catch(_) { return { type: "yandex#map", traffic: false, preset: "standard" }; }
