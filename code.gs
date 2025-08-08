@@ -22,6 +22,17 @@ try {
   };
 }
 
+function withCors(out){
+  return out
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
+function doOptions(e){
+  return withCors(ContentService.createTextOutput('')); 
+}
+
 // Создать лист и заголовки (один раз)
 function bootstrap() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -42,25 +53,25 @@ function doGet(e) {
       const radius = parseInt(e.parameter.radius || '5000', 10);
       const markers = listMarkers(lat, lng, radius);
 
-      return ContentService
+      return withCors(ContentService
         .createTextOutput(JSON.stringify({ ok: true, markers }))
-        .setMimeType(ContentService.MimeType.JSON);
+        .setMimeType(ContentService.MimeType.JSON));
     }
 
     if (action === 'ping') {
-      return ContentService
+      return withCors(ContentService
         .createTextOutput(JSON.stringify({ ok: true, pong: true }))
-        .setMimeType(ContentService.MimeType.JSON);
+        .setMimeType(ContentService.MimeType.JSON));
     }
 
-    return ContentService
+    return withCors(ContentService
       .createTextOutput(JSON.stringify({ ok: false, error: 'unknown_action' }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON));
 
   } catch (err) {
-    return ContentService
+    return withCors(ContentService
       .createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON));
   }
 }
 
@@ -71,26 +82,26 @@ function doPost(e) {
 
     if (action === 'add_marker') {
       const id = addMarker(body);
-      return ContentService
+      return withCors(ContentService
         .createTextOutput(JSON.stringify({ ok: true, id }))
-        .setMimeType(ContentService.MimeType.JSON);
+        .setMimeType(ContentService.MimeType.JSON));
     }
 
     if (action === 'confirm_marker') {
       const result = updateRating(String(body.id || ''), Number(body.delta || 1));
-      return ContentService
+      return withCors(ContentService
         .createTextOutput(JSON.stringify({ ok: true, rating: result.rating, confirmations: result.confirmations }))
-        .setMimeType(ContentService.MimeType.JSON);
+        .setMimeType(ContentService.MimeType.JSON));
     }
 
-    return ContentService
+    return withCors(ContentService
       .createTextOutput(JSON.stringify({ ok: false, error: 'unknown_action' }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON));
 
   } catch (err) {
-    return ContentService
+    return withCors(ContentService
       .createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON));
   }
 }
 
