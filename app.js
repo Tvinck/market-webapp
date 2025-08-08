@@ -33,6 +33,7 @@
     onb: $("#onb"),
     modal: $("#modal"),
     types: $("#types"),
+    title: $("#title"),
     desc: $("#desc"),
     dur: $("#dur"),
     useHere: $("#useHere"),
@@ -105,7 +106,7 @@
   function markerBalloonHTML(m){
     const dateStr = m.created_at ? new Date(m.created_at).toLocaleString('ru-RU') : '';
     const author = m.is_anon ? 'Аноним' : (m.author || '?');
-    return `<div class="marker-card"><div>${escapeHtml(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div></div>`;
+    return `<div class="marker-card">${m.title ? `<div style="font-weight:600">${escapeHtml(m.title)}</div>` : ''}<div>${escapeHtml(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div></div>`;
   }
 
   function setPreset(name){
@@ -329,7 +330,7 @@
       const t = TYPES.find(tt => tt.key === selectedType.key) || TYPES[0];
       const isAnon = !!els.anon?.checked;
       const authorName = isAnon ? '' : (tg?.initDataUnsafe?.user?.username || tg?.initDataUnsafe?.user?.first_name || "anon");
-      const draft = { description: (els.desc?.value||''), author: authorName, is_anon: isAnon, created_at: new Date().toISOString() };
+      const draft = { title: (els.title?.value||''), description: (els.desc?.value||''), author: authorName, is_anon: isAnon, created_at: new Date().toISOString() };
 
       optimisticPm = new ymaps.Placemark(pickedPoint, {
         balloonContentHeader: `<strong>${t.title}</strong>`,
@@ -345,6 +346,7 @@
         type: selectedType.key,
         lat: pickedPoint[0],
         lng: pickedPoint[1],
+        title: (els.title?.value||"").trim(),
         description: (els.desc?.value||"").trim(),
         duration_min: Number(els.dur?.value||120),
         author: authorName,
