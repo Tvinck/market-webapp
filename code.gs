@@ -1,6 +1,7 @@
 /** Маркер — Google Apps Script backend (v2.2 без setHeader) */
 const SPREADSHEET_ID = '1kthJTm6r27LFQdqL2HvlWkhWFknZgH4YpUye3AbuR0U';
 const SHEET_MARKERS  = 'markers';
+const PHOTOS_FOLDER_ID = 'YOUR_PHOTOS_FOLDER_ID';
 
 function escapeHTML(text) {
   return String(text || '').replace(/[&<>"']/g, function(c) {
@@ -19,7 +20,7 @@ function bootstrap() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sh = ss.getSheetByName(SHEET_MARKERS);
   if (!sh) sh = ss.insertSheet(SHEET_MARKERS);
-  const headers = ["id","type","lat","lng","title","description","author","client_id","is_anon","created_at","expires_at","rating","confirmations"];
+  const headers = ["id","type","lat","lng","title","description","image_url","author","client_id","is_anon","created_at","expires_at","rating","confirmations"];
   sh.getRange(1,1,1,headers.length).setValues([headers]);
 }
 
@@ -92,11 +93,11 @@ function addMarker(data) {
   const sh = ss.getSheetByName(SHEET_MARKERS) || ss.insertSheet(SHEET_MARKERS);
 
   // гарантируем заголовки
-  const header = sh.getRange(1,1,1, sh.getLastColumn() || 13).getValues()[0];
+  const header = sh.getRange(1,1,1, sh.getLastColumn() || 14).getValues()[0];
   if (!header || header[0] !== 'id') {
     sh.clear();
-    sh.getRange(1,1,1,13).setValues([[
-      'id','type','lat','lng','title','description','author','client_id','is_anon','created_at','expires_at','rating','confirmations'
+    sh.getRange(1,1,1,14).setValues([[
+      'id','type','lat','lng','title','description','image_url','author','client_id','is_anon','created_at','expires_at','rating','confirmations'
     ]]);
   }
 
@@ -108,6 +109,21 @@ function addMarker(data) {
   const title = escapeHTML(data.title || '');
   const description = escapeHTML(data.description || '');
   const author = escapeHTML(data.author || '');
+  let imageUrl = '';
+  if (data.photo) {
+    try {
+      const match = String(data.photo).match(/^data:(.+);base64,(.+)$/);
+      if (match) {
+        const contentType = match[1];
+        const bytes = Utilities.base64Decode(match[2]);
+        const ext = contentType.split('/')[1] || 'png';
+        const blob = Utilities.newBlob(bytes, contentType, id + '.' + ext);
+        const folder = PHOTOS_FOLDER_ID ? DriveApp.getFolderById(PHOTOS_FOLDER_ID) : DriveApp.getRootFolder();
+        const file = folder.createFile(blob);
+        imageUrl = file.getUrl();
+      }
+    } catch(err) {}
+  }
 
   sh.appendRow([
     id,
@@ -116,6 +132,7 @@ function addMarker(data) {
     Number(data.lng || 0),
     title,
     description,
+    imageUrl,
     author,
     String(data.client_id || ''),
     Boolean(data.is_anon),
@@ -138,7 +155,7 @@ function listMarkers(lat, lng, radiusMeters) {
   const now = new Date();
 
   for (let i = 1; i < rows.length; i++) {
-    const [id, type, la, ln, title, description, author, client_id, isAnon, created, expires, rating, confirmations] = rows[i];
+    const [id, type, la, ln, title, description, imageUrl, author, client_id, isAnon, created, expires, rating, confirmations] = rows[i];
     if (!la || !ln) continue;
     if (expires && expires < now) continue; // истёкшие скрываем
 
@@ -146,7 +163,7 @@ function listMarkers(lat, lng, radiusMeters) {
     if (dkm * 1000 <= radiusMeters) {
       out.push({
         id, type, lat: la, lng: ln,
-        title, description, author, is_anon: isAnon, created_at: created, expires_at: expires,
+        title, description, author, image_url: imageUrl, is_anon: isAnon, created_at: created, expires_at: expires,
         rating: Number(rating || 0), confirmations: Number(confirmations || 0)
       });
     }
@@ -162,10 +179,10 @@ function updateRating(id, delta) {
   const data = sh.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
     if (data[i][0] === id) {
-      const rating = Number(data[i][11] || 0) + delta;
-      const conf = Number(data[i][12] || 0) + (delta > 0 ? 1 : 0);
-      sh.getRange(i + 1, 12).setValue(rating);
-      sh.getRange(i + 1, 13).setValue(conf);
+      const rating = Number(data[i][12] || 0) + delta;
+      const conf = Number(data[i][13] || 0) + (delta > 0 ? 1 : 0);
+      sh.getRange(i + 1, 13).setValue(rating);
+      sh.getRange(i + 1, 14).setValue(conf);
       return { rating, confirmations: conf };
     }
   }

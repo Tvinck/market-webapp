@@ -38,6 +38,7 @@ const els = {
   types: $("#types"),
   title: $("#title"),
   desc: $("#desc"),
+  photo: $("#photo"),
   dur: $("#dur"),
   useHere: $("#useHere"),
   pickOnMap: $("#pickOnMap"),
