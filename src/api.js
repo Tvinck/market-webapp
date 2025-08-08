@@ -78,7 +78,17 @@ export async function publishMarker(){
     const t = window.TYPES.find(tt => tt.key === window.selectedType.key) || window.TYPES[0];
     const isAnon = !!window.els.anon?.checked;
     const authorName = isAnon ? '' : (window.tg?.initDataUnsafe?.user?.username || window.tg?.initDataUnsafe?.user?.first_name || "anon");
-    const draft = { title: (window.els.title?.value||''), description: (window.els.desc?.value||''), author: authorName, is_anon: isAnon, created_at: new Date().toISOString() };
+    let photoData = '';
+    const file = window.els.photo?.files?.[0];
+    if (file) {
+      photoData = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    const draft = { title: (window.els.title?.value||''), description: (window.els.desc?.value||''), author: authorName, is_anon: isAnon, created_at: new Date().toISOString(), image_url: photoData };
 
     optimisticPm = new ymaps.Placemark(window.pickedPoint, {
       balloonContentHeader: `<strong>${t.title}</strong>`,
@@ -100,6 +110,7 @@ export async function publishMarker(){
       author: authorName,
       client_id: window.tg?.initDataUnsafe?.user?.id || "",
       is_anon: isAnon,
+      photo: photoData,
       request_id
     };
 
