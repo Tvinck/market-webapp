@@ -105,7 +105,23 @@
   function markerBalloonHTML(m){
     const dateStr = m.created_at ? new Date(m.created_at).toLocaleString('ru-RU') : '';
     const author = m.is_anon ? 'Аноним' : (m.author || '?');
-    return `<div class="marker-card"><div>${escapeHtml(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div></div>`;
+    const title = TYPES.find(tt => tt.key === m.type)?.title || '';
+    const media = Array.isArray(m.media) ? m.media.map(u => {
+      const url = escapeHtml(String(u));
+      return url.match(/\.mp4$/) ? `<video src="${url}" controls></video>` : `<img src="${url}" alt=""/>`;
+    }).join('') : '';
+    const confirms = m.confirms || 0;
+    const comments = m.comments || 0;
+    return `
+      <div class="marker-card">
+        <div class="hdr">${escapeHtml(title)}</div>
+        <div class="body">
+          <div>${escapeHtml(m.description||'')}</div>
+          ${media ? `<div class="media">${media}</div>` : ''}
+          <div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div>
+        </div>
+        <div class="feedback"><span>✅ ${confirms}</span><span>💬 ${comments}</span></div>
+      </div>`;
   }
 
   function setPreset(name){
@@ -278,7 +294,6 @@
     (items||[]).forEach(m => {
       const t = TYPES.find(tt => tt.key === m.type) || TYPES[0];
       const pm = new ymaps.Placemark([m.lat, m.lng], {
-        balloonContentHeader: `<strong>${t.title}</strong>`,
         balloonContentBody: markerBalloonHTML(m),
         hintContent: t.title
       }, markerIconFor(t.key));
@@ -332,7 +347,6 @@
       const draft = { description: (els.desc?.value||''), author: authorName, is_anon: isAnon, created_at: new Date().toISOString() };
 
       optimisticPm = new ymaps.Placemark(pickedPoint, {
-        balloonContentHeader: `<strong>${t.title}</strong>`,
         balloonContentBody: markerBalloonHTML(draft),
         hintContent: t.title
       }, markerIconFor(t.key));
