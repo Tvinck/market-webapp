@@ -2,6 +2,18 @@
 const SPREADSHEET_ID = '1kthJTm6r27LFQdqL2HvlWkhWFknZgH4YpUye3AbuR0U';
 const SHEET_MARKERS  = 'markers';
 
+function escapeHTML(text) {
+  return String(text || '').replace(/[&<>"']/g, function(c) {
+    return ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[c];
+  });
+}
+
 // Создать лист и заголовки (один раз)
 function bootstrap() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -86,14 +98,18 @@ function addMarker(data) {
   const expires = new Date(now.getTime() + durationMin * 60000);
   const id = 'm_' + now.getTime();
 
+  const title = escapeHTML(data.title || '');
+  const description = escapeHTML(data.description || '');
+  const author = escapeHTML(data.author || '');
+
   sh.appendRow([
     id,
     String(data.type || ''),
     Number(data.lat || 0),
     Number(data.lng || 0),
-    String(data.title || ''),
-    String(data.description || ''),
-    String(data.author || ''),
+    title,
+    description,
+    author,
     String(data.client_id || ''),
     Boolean(data.is_anon),
     now,
