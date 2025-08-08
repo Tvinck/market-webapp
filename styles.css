@@ -36,6 +36,8 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-appl
 .feed{padding:12px;display:flex;flex-direction:column;gap:10px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
 .card .meta{font-size:12px;color:var(--muted)}
+.marker-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+.marker-card .meta{margin-top:6px;font-size:12px;color:var(--muted)}
 .profile{padding:16px}
 .placeholder{padding:20px;text-align:center;color:var(--muted)}
 /* modal */
