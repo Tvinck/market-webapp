@@ -142,7 +142,7 @@ export function loadFeed(){
       el.className = "card";
       const author = m.is_anon ? 'Аноним' : (m.author||'?');
       el.innerHTML = `<div><strong>${t.title}</strong></div>`+
-                      `<div class="meta">${new Date(m.created_at).toLocaleString()} • ${author}</div>`+
+                      `<div class="meta">${new Date(m.created_at).toLocaleString()} • ${author} • рейтинг: ${m.rating || 0}</div>`+
                       `<div>${escapeHTML(m.description||'')}</div>`;
       el.addEventListener("click", ()=>{
         const btn = document.querySelector('[data-tab="map"]');
