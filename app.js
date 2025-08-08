@@ -525,8 +525,9 @@
         const t = TYPES.find(tt => tt.key === m.type) || TYPES[0];
         const el = document.createElement("div");
         el.className = "card";
+        const author = m.is_anon ? 'Аноним' : (m.author||'?');
         el.innerHTML = `<div><strong>${t.title}</strong></div>
-                        <div class="meta">${new Date(m.created_at).toLocaleString()} • ${m.author||'?'}</div>
+                        <div class="meta">${new Date(m.created_at).toLocaleString()} • ${author}</div>
                         <div>${escapeHTML(m.description||'')}</div>`;
         on(el, "click", ()=>{
           const btn = document.querySelector('[data-tab="map"]');
