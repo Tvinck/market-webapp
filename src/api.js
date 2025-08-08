@@ -151,14 +151,14 @@ export async function publishMarker(){
   }
 }
 
-export async function confirmMarker(id){
+export async function confirmMarker(id, delta=1){
   const ep = endpoint(); if (!ep) return toast("API не настроено");
   try {
     const url = new URL(ep); url.searchParams.set("action","confirm_marker");
     const res = await fetch(url.toString(), {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ id })
+      body: JSON.stringify({ id, delta, client_id: window.tg?.initDataUnsafe?.user?.id || "" })
     });
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
