@@ -1,5 +1,6 @@
 import { saveTheme, loadTheme } from './theme.js';
 import { loadMapPrefs, saveMapPrefs, applyMapPrefs, setPreset, highlightActivePreset, markCustomIfTweaked } from './map.js';
+import { escapeHTML } from './utils.js';
 
 export function toast(msg, t=2200){ if(!window.els.toast) return; window.els.toast.textContent = msg; window.els.toast.classList.remove("hidden"); setTimeout(()=>window.els.toast.classList.add("hidden"), t); }
 
