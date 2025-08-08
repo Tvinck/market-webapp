@@ -7,7 +7,7 @@ function bootstrap() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sh = ss.getSheetByName(SHEET_MARKERS);
   if (!sh) sh = ss.insertSheet(SHEET_MARKERS);
-  const headers = ["id","type","lat","lng","description","author","client_id","created_at","expires_at"];
+  const headers = ["id","type","lat","lng","description","author","client_id","is_anon","created_at","expires_at"];
   sh.getRange(1,1,1,headers.length).setValues([headers]);
 }
 
@@ -73,11 +73,11 @@ function addMarker(data) {
   const sh = ss.getSheetByName(SHEET_MARKERS) || ss.insertSheet(SHEET_MARKERS);
 
   // гарантируем заголовки
-  const header = sh.getRange(1,1,1, sh.getLastColumn() || 9).getValues()[0];
+  const header = sh.getRange(1,1,1, sh.getLastColumn() || 10).getValues()[0];
   if (!header || header[0] !== 'id') {
     sh.clear();
-    sh.getRange(1,1,1,9).setValues([[
-      'id','type','lat','lng','description','author','client_id','created_at','expires_at'
+    sh.getRange(1,1,1,10).setValues([[
+      'id','type','lat','lng','description','author','client_id','is_anon','created_at','expires_at'
     ]]);
   }
 
@@ -94,6 +94,7 @@ function addMarker(data) {
     String(data.description || ''),
     String(data.author || ''),
     String(data.client_id || ''),
+    Boolean(data.is_anon),
     now,
     expires
   ]);
@@ -111,7 +112,7 @@ function listMarkers(lat, lng, radiusMeters) {
   const now = new Date();
 
   for (let i = 1; i < rows.length; i++) {
-    const [id, type, la, ln, description, author, client_id, created, expires] = rows[i];
+    const [id, type, la, ln, description, author, client_id, isAnon, created, expires] = rows[i];
     if (!la || !ln) continue;
     if (expires && expires < now) continue; // истёкшие скрываем
 
@@ -119,7 +120,7 @@ function listMarkers(lat, lng, radiusMeters) {
     if (dkm * 1000 <= radiusMeters) {
       out.push({
         id, type, lat: la, lng: ln,
-        description, author, created_at: created, expires_at: expires
+        description, author, is_anon: isAnon, created_at: created, expires_at: expires
       });
     }
   }

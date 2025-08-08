@@ -31,6 +31,7 @@
     coords: $("#coords"),
     publish: $("#publish"),
     cancel: $("#cancel"),
+    anon: $("#anon"),
     feed: $("#feed"),
     profile: $("#profile"),
     toast: $("#toast"),
@@ -90,6 +91,12 @@
       iconImageSize: [34,42],
       iconImageOffset: [-17,-42]
     };
+  }
+
+  function markerBalloonHTML(m){
+    const dateStr = m.created_at ? new Date(m.created_at).toLocaleString('ru-RU') : '';
+    const author = m.is_anon ? 'Аноним' : (m.author || '?');
+    return `<div class="marker-card"><div>${(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div></div>`;
   }
 
   function setPreset(name){
@@ -263,7 +270,7 @@
       const t = TYPES.find(tt => tt.key === m.type) || TYPES[0];
       const pm = new ymaps.Placemark([m.lat, m.lng], {
         balloonContentHeader: `<strong>${t.title}</strong>`,
-        balloonContentBody: `<div>${(m.description||'')}</div><div class="meta">Автор: ${(m.author||'?')}</div>`,
+        balloonContentBody: markerBalloonHTML(m),
         hintContent: t.title
       }, markerIconFor(t.key));
       markersCollection.add(pm);
@@ -311,9 +318,13 @@
     let optimisticPm = null;
     try {
       const t = TYPES.find(tt => tt.key === selectedType.key) || TYPES[0];
+      const isAnon = !!els.anon?.checked;
+      const authorName = isAnon ? '' : (tg?.initDataUnsafe?.user?.username || tg?.initDataUnsafe?.user?.first_name || "anon");
+      const draft = { description: (els.desc?.value||''), author: authorName, is_anon: isAnon, created_at: new Date().toISOString() };
+
       optimisticPm = new ymaps.Placemark(pickedPoint, {
         balloonContentHeader: `<strong>${t.title}</strong>`,
-        balloonContentBody: `<div>${(els.desc?.value||'')}</div><div class="meta">Отправка…</div>`,
+        balloonContentBody: markerBalloonHTML(draft),
         hintContent: t.title
       }, markerIconFor(t.key));
       markersCollection.add(optimisticPm);
@@ -327,8 +338,9 @@
         lng: pickedPoint[1],
         description: (els.desc?.value||"").trim(),
         duration_min: Number(els.dur?.value||120),
-        author: tg?.initDataUnsafe?.user?.username || tg?.initDataUnsafe?.user?.first_name || "anon",
+        author: authorName,
         client_id: tg?.initDataUnsafe?.user?.id || "",
+        is_anon: isAnon,
         request_id
       };
 
