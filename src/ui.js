@@ -93,6 +93,9 @@ export function renderProfile(){
           <label for="trafficToggle" style="margin-left:6px">Показывать пробки</label>
         </div>
       </div>
+
+      <div style="font-weight:600;margin:16px 0 8px 0">Мои метки</div>
+      <div id="myMarkers"></div>
     `;
 
   document.getElementById("themeLight")?.addEventListener("click", ()=>{
@@ -128,6 +131,31 @@ export function renderProfile(){
   document.getElementById("presetMono")?.addEventListener("click", () => { setPreset("mono"); toast("Монохром"); });
   document.getElementById("presetMinimal")?.addEventListener("click", () => { setPreset("minimal"); toast("Минимал"); });
   document.getElementById("presetReset")?.addEventListener("click", () => { setPreset("reset"); toast("Сброс настроек"); });
+
+  const myMarkers = document.getElementById("myMarkers");
+  const myList = (window.__markersCache || []).filter(m => m.client_id == u?.id);
+  if (myMarkers){
+    myMarkers.innerHTML = "";
+    if (!myList.length){
+      myMarkers.innerHTML = '<div class="placeholder">Вы ещё не добавили меток.</div>';
+    } else {
+      myList
+        .slice()
+        .sort((a,b)=> new Date(b.created_at) - new Date(a.created_at))
+        .forEach(m => {
+          const el = document.createElement("div");
+          el.className = "card";
+          el.innerHTML = `<div><strong>${escapeHTML(m.title||'Без названия')}</strong></div>`+
+                          `<div class="meta">${new Date(m.created_at).toLocaleString()}</div>`;
+          el.addEventListener("click", () => {
+            const btn = document.querySelector('[data-tab="map"]');
+            btn?.click();
+            if (window.map) window.map.setCenter([m.lat, m.lng], 15, {duration:200});
+          });
+          myMarkers.appendChild(el);
+        });
+    }
+  }
 
   highlightActivePreset(cfg.preset);
   applyMapPrefs();
