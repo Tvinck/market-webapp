@@ -1,4 +1,4 @@
-import { markerIconFor, markerBalloonHTML } from './map.js';
+import { markerIconFor, markerBalloonHTML, markerBalloonLayout } from './map.js';
 import { toast } from './ui.js';
 
 // All API calls go through a local proxy by default
@@ -28,12 +28,12 @@ export function renderMarkers(items){
   window.markersCollection.removeAll();
   (items||[]).forEach(m => {
     const t = window.TYPES.find(tt => tt.key === m.type) || window.TYPES[0];
+    const content = `<div class="marker-balloon__title"><strong>${t.title}</strong></div>${markerBalloonHTML(m)}`;
     const pm = new ymaps.Placemark([m.lat, m.lng], {
-      balloonContentHeader: `<strong>${t.title}</strong>`,
-      balloonContentBody: markerBalloonHTML(m),
+      balloonContent: content,
       hintContent: t.title,
       marker_id: m.id
-    }, markerIconFor(t.key));
+    }, { ...markerIconFor(t.key), balloonContentLayout: markerBalloonLayout, hideIconOnBalloonOpen: false });
     window.markersCollection.add(pm);
   });
 }
@@ -102,11 +102,11 @@ export async function publishMarker(){
     }
     const draft = { title: (window.els.title?.value||''), description: (window.els.desc?.value||''), author: authorName, is_anon: isAnon, created_at: new Date().toISOString(), image_url: photoData };
 
+    const draftContent = `<div class="marker-balloon__title"><strong>${t.title}</strong></div>${markerBalloonHTML(draft)}`;
     optimisticPm = new ymaps.Placemark(window.pickedPoint, {
-      balloonContentHeader: `<strong>${t.title}</strong>`,
-      balloonContentBody: markerBalloonHTML(draft),
+      balloonContent: draftContent,
       hintContent: t.title
-    }, markerIconFor(t.key));
+    }, { ...markerIconFor(t.key), balloonContentLayout: markerBalloonLayout, hideIconOnBalloonOpen: false });
     window.markersCollection.add(optimisticPm);
 
     const url = new URL(ep); url.searchParams.set("action","add_marker");

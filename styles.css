@@ -38,6 +38,10 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-appl
 .card .meta{font-size:12px;color:var(--muted)}
 .marker-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
 .marker-card .meta{margin-top:6px;font-size:12px;color:var(--muted)}
+.marker-balloon{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.marker-balloon__close{position:absolute;top:4px;right:6px;background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer}
+.marker-balloon__close:hover{color:var(--text)}
+.marker-balloon__title{margin-bottom:6px;font-weight:600}
 .profile{padding:16px}
 .placeholder{padding:20px;text-align:center;color:var(--muted)}
 /* modal */
