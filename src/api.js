@@ -1,7 +1,10 @@
 import { markerIconFor, markerBalloonHTML } from './map.js';
 import { toast } from './ui.js';
 
-export function endpoint(){ return String(window.MARKER_CONFIG?.GAS_ENDPOINT || ""); }
+// All API calls go through a local proxy by default
+export function endpoint(){
+  return String(window.MARKER_CONFIG?.GAS_ENDPOINT || '/server/api/marker_api.php');
+}
 
 export async function fetchMarkers(){
   if (!window.map) return;
