@@ -50,15 +50,25 @@ export function buildTypes(){
   });
 }
 
-export function renderProfile(){
+export async function renderProfile(){
   if (!window.els.profile) return;
   const u = window.tg?.initDataUnsafe?.user;
   const cfg = loadMapPrefs();
   const theme = loadTheme();
 
+  let rating = 0, rank = '';
+  const ep = String(window.MARKER_CONFIG?.GAS_ENDPOINT || '/server/api/marker_api.php');
+  if (u?.id && ep) {
+    try {
+      const url = new URL(ep); url.searchParams.set('action','get_user'); url.searchParams.set('client_id', u.id);
+      const res = await fetch(url.toString(), { method:'GET' });
+      if (res.ok) { const d = await res.json(); rating = Number(d.rating||0); rank = String(d.rank||''); }
+    } catch(_){ }
+  }
+
   window.els.profile.innerHTML = `
-      <div class="card"><strong>${u?.first_name||'Гость'} ${u?.last_name||''}</strong>
-        <div class="meta">@${u?.username||''}</div>
+      <div class="card"><strong>${rank ? rank + ' ' : ''}${u?.first_name||'Гость'} ${u?.last_name||''}</strong>
+        <div class="meta">@${u?.username||''} • рейтинг: ${rating}</div>
       </div>
 
       <div class="card">
