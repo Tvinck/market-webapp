@@ -125,13 +125,18 @@ function initMap(){
 }
 
 els.navBtns.forEach(btn => {
-  on(btn, "click", () => {
+  on(btn, "click", async () => {
     document.querySelectorAll(".navbtn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     const target = btn.dataset.tab;
     Object.entries(els.tabs).forEach(([k, el]) => el && el.classList.toggle("active", k === target));
     if (target === "feed") loadFeed();
-    if (target === "profile") renderProfile();
+    if (target === "profile") {
+      if (!window.__markersCache || !window.__markersCache.length) {
+        await fetchMarkers();
+      }
+      renderProfile();
+    }
   });
 });
 
