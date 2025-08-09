@@ -6,7 +6,7 @@
 <title>Маркер — WebApp</title>
 <link rel="stylesheet" href="styles.css?v=3.9" />
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://api-maps.yandex.ru/2.1/?apikey=79bead93-8713-4de9-9dac-484d3aa0980d&lang=ru_RU"></script>
+<meta name="ya-maps-key" content="" />
 </head>
 <body>
 <div id="app">
@@ -122,6 +122,7 @@
   window.MARKER_CONFIG = {
     // Replace GAS_ENDPOINT with your Google Apps Script URL or proxy path.
     GAS_ENDPOINT: "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec",
+    YA_MAPS_KEY: "",
     DEFAULT_RADIUS_METERS: 5000
   };
 </script>

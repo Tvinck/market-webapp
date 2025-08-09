@@ -76,6 +76,14 @@ window.toast = toast;
 window.openModal = openModal;
 window.closeModal = closeModal;
 
+function loadYaMaps(cb){
+  const key = window.MARKER_CONFIG?.YA_MAPS_KEY || document.querySelector('meta[name="ya-maps-key"]')?.content;
+  const script = document.createElement('script');
+  script.src = 'https://api-maps.yandex.ru/2.1/?lang=ru_RU' + (key ? '&apikey=' + encodeURIComponent(key) : '');
+  script.onload = cb;
+  document.head.appendChild(script);
+}
+
 function initMap(){
   if (!window.ymaps) return;
   ymaps.ready(() => {
@@ -181,4 +189,4 @@ on(els.zoomOut, "click", ()=>{ if (window.map) window.map.setZoom(window.map.get
 applyTheme();
 showOnbIfNeeded();
 buildTypes();
-initMap();
+loadYaMaps(initMap);
