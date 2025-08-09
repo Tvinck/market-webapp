@@ -27,10 +27,8 @@ try {
 }
 
 function withCors(out){
-  return out
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  out.setHeader('Access-Control-Allow-Origin', '*');
+  return out;
 }
 
 function doOptions(e){
