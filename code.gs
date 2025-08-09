@@ -6,7 +6,7 @@ const SHEET_MARKERS  = 'markers';
 const SHEET_USERS    = 'users';
 
 const PHOTOS_FOLDER_ID = '1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU';
-
+// escapeHTML is shared with the frontend and lives in src/utils.js
 const { escapeHTML } = require('./src/utils.js');
 
 function withCors(out){
