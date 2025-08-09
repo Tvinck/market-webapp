@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $context = stream_context_create($opts);
 $resp = @file_get_contents($url, false, $context);
 
+// Extract HTTP status code from the upstream response headers.
 $status = 200;
 if (isset($http_response_header[0]) &&
     preg_match('/^HTTP\/\S+\s+(\d+)/', $http_response_header[0], $m)) {
@@ -43,13 +44,28 @@ if (isset($http_response_header[0]) &&
 header('Content-Type: application/json; charset=UTF-8');
 if ($resp === false) {
   $err = error_get_last();
-  http_response_code(502);
+  http_response_code($status >= 400 ? $status : 502);
   if ($err && isset($err['message'])) {
     error_log($err['message']);
   }
   echo json_encode([
     'ok' => false,
     'error' => 'proxy_failed'
+  ], JSON_UNESCAPED_UNICODE);
+  exit;
+}
+
+// Ensure the upstream body is valid JSON; otherwise forward an error structure.
+$decoded = json_decode($resp);
+if (json_last_error() !== JSON_ERROR_NONE) {
+  http_response_code($status);
+  if ($status >= 400) {
+    error_log($resp);
+  }
+  echo json_encode([
+    'ok' => false,
+    'error' => 'invalid_json',
+    'body' => $resp
   ], JSON_UNESCAPED_UNICODE);
   exit;
 }
