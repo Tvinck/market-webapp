@@ -1,14 +1,17 @@
-export function escapeHTML(text) {
-  return (text || "").replace(/[&<>"']/g, c => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  })[c]);
+function escapeHTML(text) {
+  return String(text || '').replace(/[&<>"']/g, function (c) {
+    return ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[c];
+  });
 }
 
-// CommonJS compatibility for server-side usage
+export { escapeHTML };
+
 if (typeof module !== 'undefined') {
   module.exports = { escapeHTML };
 }

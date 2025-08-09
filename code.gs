@@ -7,24 +7,7 @@ const SHEET_USERS    = 'users';
 
 const PHOTOS_FOLDER_ID = '1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU';
 
-let escapeHTML;
-try {
-  // CommonJS: load shared utility
-  escapeHTML = require('./src/utils.js').escapeHTML;
-} catch (e) {
-  // Fallback for direct Apps Script execution - keep in sync with src/utils.js
-  escapeHTML = function(text) {
-    return String(text || '').replace(/[&<>"']/g, function(c) {
-      return ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      })[c];
-    });
-  };
-}
+const { escapeHTML } = require('./src/utils.js');
 
 function withCors(out){
   out.setHeader('Access-Control-Allow-Origin', '*');
