@@ -117,9 +117,17 @@
 
 <div id="toast" class="toast hidden"></div>
 
+
+<script>
+  window.MARKER_CONFIG = {
+    // Client requests go to the local PHP proxy which forwards to the
+    // actual Google Apps Script endpoint configured on the server.
+    GAS_ENDPOINT: "/server/api/marker_api.php",
+
   <script>
     window.MARKER_CONFIG = {
     GAS_ENDPOINT: "https://script.google.com/macros/s/AKfycbyAl3VHgOygkgL6wt9OaG0_xMSZRg0j7kmfBlBeTlMVA6TkpwYAN0j61XggDLYwLqS0/exec",
+
     DEFAULT_RADIUS_METERS: 5000
   };
   </script>
