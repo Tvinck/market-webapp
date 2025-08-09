@@ -19,11 +19,11 @@
 ## Установка
 
 1. Установите PHP и клонируйте репозиторий.
-2. Укажите ключ Yandex Maps API:
-   - через поле `YA_MAPS_KEY` объекта `window.MARKER_CONFIG` в `index.html`,
-   - либо добавив мета‑тег `<meta name="ya-maps-key" content="ВАШ_КЛЮЧ">` в `<head>`.
-3. В `index.html` замените `window.MARKER_CONFIG.GAS_ENDPOINT` на URL веб‑приложения Google Apps Script или путь к прокси, например `/server/api/marker_api.php`.
-4. В `server/config.php` задайте `PHOTOS_FOLDER_ID` и список `MARKER_ALLOWED_ORIGINS` или используйте переменные окружения (см. ниже).
+2. Укажите ключ Yandex Maps API (в `index.html` установлен плейсхолдер `YOUR_YA_MAPS_KEY`):
+   - через поле `YA_MAPS_KEY` объекта `window.MARKER_CONFIG`,
+   - либо в мета‑теге `<meta name="ya-maps-key" content="ВАШ_КЛЮЧ">` в `<head>`.
+3. В `index.html` замените `window.MARKER_CONFIG.GAS_ENDPOINT` на URL веб‑приложения Google Apps Script или путь к прокси (например `/server/api/marker_api.php`).
+4. Задайте переменные окружения `MARKER_GAS_ENDPOINT`, `PHOTOS_FOLDER_ID` и `MARKER_ALLOWED_ORIGINS` (см. ниже) или измените их значения в `server/config.php`.
 5. Запустите сервер: `php -S localhost:8000 -t server`.
 
 ## Деплой Google Apps Script
@@ -35,6 +35,8 @@
 3. После копирования `escapeHTML` станет доступна в коде `code.gs` без изменений.
 
 ## Настройка переменных окружения
+
+Эти переменные используются `server/config.php` и `server/api/marker_api.php`.
 
 ```bash
 export MARKER_GAS_ENDPOINT="https://script.google.com/macros/s/AKfycbwhBNyiokWlf6ifcD7sG0oOhU_xFIQrGBW8ZBDpZa_PmyGdYlQ0HRN0Zqgrn2em6CgSWA/exec"

@@ -1,6 +1,8 @@
 <?php
 $config = @include __DIR__ . '/../config.php';
-$allowed = $config['allowed_origins'] ?? [];
+$allowed = $config['allowed_origins'] ?? array_filter(
+    array_map('trim', explode(',', getenv('MARKER_ALLOWED_ORIGINS') ?: ''))
+);
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if ($origin && (empty($allowed) || in_array($origin, $allowed, true))) {
   header("Access-Control-Allow-Origin: $origin");
@@ -12,7 +14,7 @@ header('Access-Control-Allow-Methods: GET,POST,OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
-$gasEndpoint = $config['gas_endpoint'] ?? '';
+$gasEndpoint = $config['gas_endpoint'] ?? getenv('MARKER_GAS_ENDPOINT') ?: '';
 if (!$gasEndpoint) {
   http_response_code(500);
   header('Content-Type: application/json; charset=UTF-8');
