@@ -9,7 +9,10 @@
 ## Установка
 
 1. Установите PHP и клонируйте репозиторий.
-2. Ключ [Yandex Maps API](https://developer.tech.yandex.ru/) уже прописан в `index.html` (`79bead93-8713-4de9-9dac-484d3aa0980d`); при необходимости замените на свой.
+2. Получите ключ [Yandex Maps API](https://developer.tech.yandex.ru/) и укажите его:
+   - через поле `YA_MAPS_KEY` объекта `window.MARKER_CONFIG` в `index.html`,
+   - либо добавив мета‑тег `<meta name="ya-maps-key" content="ВАШ_КЛЮЧ">` в `<head>`.
+   Скрипт карт загрузится автоматически с указанным ключом.
 3. Разверните Google Apps Script:
    - откройте <https://script.google.com/>, создайте новый проект и вставьте содержимое `code.gs` (значение `PHOTOS_FOLDER_ID` уже указано: `1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU`);
    - при необходимости измените `SPREADSHEET_ID`;
