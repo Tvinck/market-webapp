@@ -56,19 +56,21 @@ export async function renderProfile(){
   const cfg = loadMapPrefs();
   const theme = loadTheme();
 
-  let rating = 0, rank = '';
+  let rating = 0, markers = 0, prefix = '';
   const ep = String(window.MARKER_CONFIG?.GAS_ENDPOINT || '/server/api/marker_api.php');
   if (u?.id && ep) {
     try {
-      const url = new URL(ep); url.searchParams.set('action','get_user'); url.searchParams.set('client_id', u.id);
+      const url = new URL(ep); url.searchParams.set('action','get_user_stats'); url.searchParams.set('client_id', u.id);
       const res = await fetch(url.toString(), { method:'GET' });
-      if (res.ok) { const d = await res.json(); rating = Number(d.rating||0); rank = String(d.rank||''); }
+      if (res.ok) { const d = await res.json(); rating = Number(d.rating||0); markers = Number(d.markers||0); prefix = String(d.prefix||''); }
     } catch(_){ }
   }
 
   window.els.profile.innerHTML = `
-      <div class="card"><strong>${rank ? rank + ' ' : ''}${u?.first_name||'Гость'} ${u?.last_name||''}</strong>
-        <div class="meta">@${u?.username||''} • рейтинг: ${rating}</div>
+      <div class="card"><strong>${prefix ? escapeHTML(prefix) + ' ' : ''}${u?.first_name||'Гость'} ${u?.last_name||''}</strong>
+        <div class="meta">@${u?.username||''}</div>
+        <div class="meta">Рейтинг: ${rating}</div>
+        <div class="meta">Создано меток: ${markers}</div>
       </div>
 
       <div class="card">

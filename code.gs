@@ -43,26 +43,27 @@ function ensureUserSheet(){
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sh = ss.getSheetByName(SHEET_USERS);
   if (!sh) sh = ss.insertSheet(SHEET_USERS);
-  const header = sh.getRange(1,1,1, sh.getLastColumn() || 3).getValues()[0];
+  const header = sh.getRange(1,1,1, sh.getLastColumn() || 4).getValues()[0];
   if (!header || header[0] !== 'client_id') {
     sh.clear();
-    sh.getRange(1,1,1,3).setValues([[ 'client_id','rating','rank' ]]);
+    sh.getRange(1,1,1,4).setValues([[ 'client_id','rating','rank','prefix' ]]);
   }
   return sh;
 }
 
 function getUser(clientId){
-  if (!clientId) return { rating:0, rank: rankFor(0) };
+  if (!clientId) return { rating:0, rank: rankFor(0), prefix:'' };
   const sh = ensureUserSheet();
   const data = sh.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
     if (data[i][0] === clientId) {
       const rating = Number(data[i][1] || 0);
       const rank = data[i][2] || rankFor(rating);
-      return { rating, rank };
+      const prefix = data[i][3] || '';
+      return { rating, rank, prefix };
     }
   }
-  return { rating:0, rank: rankFor(0) };
+  return { rating:0, rank: rankFor(0), prefix:'' };
 }
 
 function updateUserRating(clientId, delta){
@@ -81,8 +82,22 @@ function updateUserRating(clientId, delta){
   }
   let rating = delta < 0 ? 0 : delta;
   const rank = rankFor(rating);
-  sh.appendRow([clientId, rating, rank]);
+  sh.appendRow([clientId, rating, rank, '']);
   return { rating, rank };
+}
+
+function getUserStats(clientId){
+  const info = getUser(clientId);
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const mSh = ss.getSheetByName(SHEET_MARKERS);
+  let count = 0;
+  if (mSh){
+    const mData = mSh.getDataRange().getValues();
+    for (let i = 1; i < mData.length; i++) {
+      if (mData[i][8] === clientId) count++;
+    }
+  }
+  return { rating: info.rating, prefix: info.prefix || '', markers: count };
 }
 // Создать лист и заголовки (один раз)
 function bootstrap() {
@@ -121,6 +136,14 @@ function doGet(e) {
       const info = getUser(clientId);
       return withCors(ContentService
         .createTextOutput(JSON.stringify({ ok: true, rating: info.rating, rank: info.rank }))
+        .setMimeType(ContentService.MimeType.JSON));
+    }
+
+    if (action === 'get_user_stats') {
+      const clientId = String(e.parameter.client_id || '');
+      const info = getUserStats(clientId);
+      return withCors(ContentService
+        .createTextOutput(JSON.stringify({ ok: true, rating: info.rating, markers: info.markers, prefix: info.prefix }))
         .setMimeType(ContentService.MimeType.JSON));
     }
 
