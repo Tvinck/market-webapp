@@ -45,7 +45,7 @@
 Эти переменные используются `server/config.php` и `server/api/marker_api.php`.
 
 ```bash
-export MARKER_GAS_ENDPOINT="https://script.google.com/macros/s/AKfycbwhBNyiokWlf6ifcD7sG0oOhU_xFIQrGBW8ZBDpZa_PmyGdYlQ0HRN0Zqgrn2em6CgSWA/exec"
+export MARKER_GAS_ENDPOINT="https://script.google.com/macros/s/AKfycbx3CPHhhllWwAAkrRvw4FcVYsC4ehikeLBeIhwblgF5FERuZk5kRJ9SGXTagdyoJT59dA/exec"
 export PHOTOS_FOLDER_ID="1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU"
 export MARKER_ALLOWED_ORIGINS="https://www.bazzarproject.ru,https://bazzarproject.ru,http://localhost:8000"
 ```

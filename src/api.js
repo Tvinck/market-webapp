@@ -2,7 +2,7 @@ import { markerIconFor, markerBalloonHTML, markerBalloonLayout } from './map.js'
 import { toast } from './ui.js';
 import { haversine } from './utils.js';
 
-const EXPECTED_URL = 'https://script.google.com/macros/s/AKfycbz6w3ywFsYJHY3Q9t66t4BbcJKYk6GDNY_oiAV-wIN6N6ZRi496EEtBzxNPsPArew8ldA/exec';
+const EXPECTED_URL = 'https://script.google.com/macros/s/AKfycbx3CPHhhllWwAAkrRvw4FcVYsC4ehikeLBeIhwblgF5FERuZk5kRJ9SGXTagdyoJT59dA/exec';
 
 // Return configured GAS endpoint or empty string if missing
 export function endpoint(){
