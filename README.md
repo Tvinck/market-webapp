@@ -24,7 +24,13 @@
    - либо в мета‑теге `<meta name="ya-maps-key" content="ВАШ_КЛЮЧ">` в `<head>`.
 3. В `index.html` замените `window.MARKER_CONFIG.GAS_ENDPOINT` на URL веб‑приложения Google Apps Script или путь к прокси (например `/server/api/marker_api.php`).
 4. Задайте переменные окружения `MARKER_GAS_ENDPOINT`, `PHOTOS_FOLDER_ID` и `MARKER_ALLOWED_ORIGINS` (см. ниже) или измените их значения в `server/config.php`.
-5. Запустите сервер: `php -S localhost:8000 -t server`.
+5. Запустите встроенный сервер PHP из корня проекта, чтобы одновременно обслуживать статические файлы и API:
+
+   ```bash
+   php -S localhost:8000
+   ```
+
+   В этом режиме фронтенд доступен по `http://localhost:8000/`, а прокси API — по `http://localhost:8000/server/api/marker_api.php`.
 
 ## Деплой Google Apps Script
 
@@ -50,16 +56,18 @@ export MARKER_ALLOWED_ORIGINS="https://www.bazzarproject.ru,https://bazzarprojec
 
 ## Локальный запуск и тестирование
 
-1. Запустите PHP‑сервер:
+1. Запустите PHP‑сервер из корня проекта:
 
    ```bash
-   php -S localhost:8000 -t server
+   php -S localhost:8000
    ```
+
+   API будет доступно по адресу `http://localhost:8000/server/api/marker_api.php`.
 
 2. Проверьте работу прокси:
 
    ```bash
-   curl http://localhost:8000/api/marker_api.php?action=ping
+   curl http://localhost:8000/server/api/marker_api.php?action=ping
    ```
 
    Ожидаемый ответ — `{"ok":true,"pong":true}`.
@@ -67,9 +75,9 @@ export MARKER_ALLOWED_ORIGINS="https://www.bazzarproject.ru,https://bazzarprojec
 3. Опубликуйте тестовую метку:
 
    ```bash
-   curl -X POST http://localhost:8000/api/marker_api.php?action=add_marker \\
-     -H "Content-Type: application/json" \\
-     -d '{"lat":55.75,"lng":37.61,"title":"Test","description":"Demo","author":"local","client_id":"debug"}'
+   curl -X POST http://localhost:8000/server/api/marker_api.php?action=add_marker \\
+    -H "Content-Type: application/json" \\
+    -d '{"lat":55.75,"lng":37.61,"title":"Test","description":"Demo","author":"local","client_id":"debug"}'
    ```
 
    В ответ должно вернуться `{"ok":true,"id":"m_..."}`.
