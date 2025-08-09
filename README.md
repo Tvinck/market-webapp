@@ -8,14 +8,15 @@
 ## Установка
 
 1. Установите PHP и клонируйте репозиторий.
-2. Получите ключ [Yandex Maps API](https://developer.tech.yandex.ru/) и замените `YOUR_YANDEX_API_KEY` в теге подключения карт в `index.html`.
+2. Ключ [Yandex Maps API](https://developer.tech.yandex.ru/) уже прописан в `index.html` (`79bead93-8713-4de9-9dac-484d3aa0980d`); при необходимости замените на свой.
 3. Разверните Google Apps Script:
-   - откройте <https://script.google.com/>, создайте новый проект и вставьте содержимое `code.gs`;
-   - задайте `PHOTOS_FOLDER_ID` (ID папки Google Drive для загрузок) и при необходимости `SPREADSHEET_ID`;
+   - откройте <https://script.google.com/>, создайте новый проект и вставьте содержимое `code.gs` (значение `PHOTOS_FOLDER_ID` уже указано: `1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU`);
+   - при необходимости измените `SPREADSHEET_ID`;
    - через меню **Deploy → New deployment → Web app** получите URL веб‑приложения.
-4. Укажите полученный URL в `window.MARKER_CONFIG.GAS_ENDPOINT` или пропишите `gas_endpoint` в `server/config.php` для прокси `server/api/marker_api.php`.
-5. В `server/config.php` задайте `PHOTOS_FOLDER_ID` и список `MARKER_ALLOWED_ORIGINS` (можно через одноимённые переменные окружения).
-6. Запустите сервер, например: `php -S localhost:8000 -t server`.
+4. В `window.MARKER_CONFIG.GAS_ENDPOINT` оставьте `/server/api/marker_api.php` — клиент будет обращаться к локальному PHP‑прокси.
+5. Настоящий URL Google Apps Script указывается в `server/config.php` (ключ `gas_endpoint` или переменная окружения `MARKER_GAS_ENDPOINT`).
+6. В `server/config.php` уже заданы `PHOTOS_FOLDER_ID` и список `MARKER_ALLOWED_ORIGINS` (`https://www.bazzarproject.ru`); замените при необходимости или задайте через одноимённые переменные окружения.
+7. Запустите сервер, например: `php -S localhost:8000 -t server`.
 
 ### Примеры конфигурации и деплоя
 
@@ -24,18 +25,18 @@
 ```php
 <?php
 return [
-    'gas_endpoint' => 'https://script.google.com/macros/s/XXXXXXXX/exec',
-    'photos_folder_id' => '1AbCDeFgHiJ',
-    'allowed_origins' => ['https://example.com']
+    'gas_endpoint' => 'https://script.google.com/macros/s/AKfycbwhBNyiokWlf6ifcD7sG0oOhU_xFIQrGBW8ZBDpZa_PmyGdYlQ0HRN0Zqgrn2em6CgSWA/exec',
+    'photos_folder_id' => '1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU',
+    'allowed_origins' => ['https://www.bazzarproject.ru']
 ];
 ```
 
 Команды:
 
 ```
-export MARKER_GAS_ENDPOINT="https://script.google.com/macros/s/XXXXXXXX/exec"
-export PHOTOS_FOLDER_ID="1AbCDeFgHiJ"
-export MARKER_ALLOWED_ORIGINS="https://example.com,https://example.org"
+export MARKER_GAS_ENDPOINT="https://script.google.com/macros/s/AKfycbwhBNyiokWlf6ifcD7sG0oOhU_xFIQrGBW8ZBDpZa_PmyGdYlQ0HRN0Zqgrn2em6CgSWA/exec"
+export PHOTOS_FOLDER_ID="1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU"
+export MARKER_ALLOWED_ORIGINS="https://www.bazzarproject.ru"
 php -S localhost:8000 -t server
 RSYNC_DEST=user@host:/var/www/marker-webapp ./deploy.sh
 ```
