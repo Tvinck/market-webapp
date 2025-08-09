@@ -1,12 +1,18 @@
 <?php
 $config = @include __DIR__ . '/../config.php';
-$allowed = $config['allowed_origins'] ?? array_filter(
-    array_map('trim', explode(',', getenv('MARKER_ALLOWED_ORIGINS') ?: ''))
-);
+$allowed = $config['allowed_origins'] ?? [];
+if (empty($allowed)) {
+  http_response_code(500);
+  header('Content-Type: application/json; charset=UTF-8');
+  echo '{"ok":false,"error":"allowed_origins_not_configured"}';
+  exit;
+}
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin && (empty($allowed) || in_array($origin, $allowed, true))) {
+if ($origin === '') {
+  // Same-origin request.
+} elseif (in_array($origin, $allowed, true)) {
   header("Access-Control-Allow-Origin: $origin");
-} elseif (!empty($allowed)) {
+} else {
   http_response_code(403);
   exit;
 }

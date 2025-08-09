@@ -23,7 +23,7 @@
    - через поле `YA_MAPS_KEY` объекта `window.MARKER_CONFIG`,
    - либо в мета‑теге `<meta name="ya-maps-key" content="ВАШ_КЛЮЧ">` в `<head>`.
 3. В `index.html` замените `window.MARKER_CONFIG.GAS_ENDPOINT` на URL веб‑приложения Google Apps Script или путь к прокси (например `/server/api/marker_api.php`).
-4. Задайте переменные окружения `MARKER_GAS_ENDPOINT`, `PHOTOS_FOLDER_ID` и `MARKER_ALLOWED_ORIGINS` (см. ниже) или измените их значения в `server/config.php`.
+4. Задайте переменные окружения `MARKER_GAS_ENDPOINT`, `PHOTOS_FOLDER_ID` и обязательную для продакшена `MARKER_ALLOWED_ORIGINS` (см. ниже) или измените их значения в `server/config.php`. Без `MARKER_ALLOWED_ORIGINS` сервер отклоняет запросы.
 5. Запустите встроенный сервер PHP из корня проекта, чтобы одновременно обслуживать статические файлы и API:
 
    ```bash
@@ -50,9 +50,9 @@ export PHOTOS_FOLDER_ID="1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU"
 export MARKER_ALLOWED_ORIGINS="https://www.bazzarproject.ru,https://bazzarproject.ru,http://localhost:8000"
 ```
 
-`MARKER_GAS_ENDPOINT` — URL Google Apps Script или локального прокси.  
-`PHOTOS_FOLDER_ID` — ID папки Google Drive.  
-`MARKER_ALLOWED_ORIGINS` — разрешённые Origin (через запятую).
+`MARKER_GAS_ENDPOINT` — URL Google Apps Script или локального прокси.
+`PHOTOS_FOLDER_ID` — ID папки Google Drive.
+`MARKER_ALLOWED_ORIGINS` — разрешённые Origin (через запятую). Обязательна в продакшене: без неё сервер вернёт `allowed_origins_not_configured`. В режиме разработки при отсутствии переменной разрешён только `http://localhost:8000`.
 
 ## Локальный запуск и тестирование
 
@@ -84,7 +84,7 @@ export MARKER_ALLOWED_ORIGINS="https://www.bazzarproject.ru,https://bazzarprojec
 ## Серверное API
 
 PHP‑прокси для Google Apps Script теперь расположен в `server/api/marker_api.php`.
-Заголовок `Access-Control-Allow-Origin` больше не жёстко прописан: при отсутствии ограничений возвращается Origin клиента, либо проверяется белый список из `server/config.php` (переменная окружения `MARKER_ALLOWED_ORIGINS`).
+Заголовок `Access-Control-Allow-Origin` проверяется по белому списку из `server/config.php` (переменная окружения `MARKER_ALLOWED_ORIGINS`). При отсутствии настроек сервер вернёт `allowed_origins_not_configured` (в режиме разработки по умолчанию разрешён `http://localhost:8000`).
 
 Прокси передаёт HTTP‑код ответа от Google Apps Script и при сетевых сбоях отдаёт `502` с JSON `{ "ok": false, "error": "..." }`.
 Клиенту следует проверять `response.ok` и поле `ok` в JSON:
