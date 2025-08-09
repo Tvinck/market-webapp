@@ -62,6 +62,22 @@ RSYNC_DEST=user@host:/var/www/marker-webapp ./deploy.sh
 PHP‑прокси для Google Apps Script теперь расположен в `server/api/marker_api.php`.
 Заголовок `Access-Control-Allow-Origin` больше не жёстко прописан: при отсутствии ограничений возвращается Origin клиента, либо проверяется белый список из `server/config.php` (переменная окружения `MARKER_ALLOWED_ORIGINS`).
 
+Прокси передаёт HTTP‑код ответа от Google Apps Script и при сетевых сбоях отдаёт `502` с JSON `{ "ok": false, "error": "..." }`.
+Клиенту следует проверять `response.ok` и поле `ok` в JSON:
+
+```js
+fetch('/server/api/marker_api.php?action=ping')
+  .then(async (res) => {
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      console.error('Proxy error:', data.error);
+      return;
+    }
+    // обработка успешного ответа
+  })
+  .catch((err) => console.error('Network error', err));
+```
+
 ## Рейтинг и уровни
 
 Для каждого `client_id` хранится отдельный рейтинг и вычисляемый уровень.
