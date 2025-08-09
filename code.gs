@@ -6,8 +6,29 @@ const SHEET_MARKERS  = 'markers';
 const SHEET_USERS    = 'users';
 
 const PHOTOS_FOLDER_ID = '1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU';
-// escapeHTML and haversine are shared with the frontend and live in src/utils.js
-const { escapeHTML, haversine } = require('./src/utils.js');
+// escapeHTML and haversine utilities (copied from src/utils.js for GAS compatibility)
+function escapeHTML(text) {
+  return String(text || '').replace(/[&<>"']/g, function (c) {
+    return ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[c];
+  });
+}
+
+function haversine(a, b) {
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(b[0] - a[0]);
+  const dLng = toRad(b[1] - a[1]);
+  const s1 = Math.sin(dLat / 2);
+  const s2 = Math.sin(dLng / 2);
+  const c = Math.cos(toRad(a[0])) * Math.cos(toRad(b[0]));
+  return 2 * R * Math.asin(Math.sqrt(s1 * s1 + c * s2 * s2));
+}
 
 function withCors(out){
   out.setHeader('Access-Control-Allow-Origin', '*');
