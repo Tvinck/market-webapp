@@ -1,7 +1,10 @@
-import { markerIconFor, markerBalloonHTML } from './map.js';
+import { markerIconFor, markerBalloonHTML, markerBalloonLayout } from './map.js';
 import { toast } from './ui.js';
 
-export function endpoint(){ return String(window.MARKER_CONFIG?.GAS_ENDPOINT || ""); }
+// All API calls go through a local proxy by default
+export function endpoint(){
+  return String(window.MARKER_CONFIG?.GAS_ENDPOINT || '/server/api/marker_api.php');
+}
 
 export async function fetchMarkers(){
   if (!window.map) return;
@@ -25,12 +28,12 @@ export function renderMarkers(items){
   window.markersCollection.removeAll();
   (items||[]).forEach(m => {
     const t = window.TYPES.find(tt => tt.key === m.type) || window.TYPES[0];
+    const content = `<div class="marker-balloon__title"><strong>${t.title}</strong></div>${markerBalloonHTML(m)}`;
     const pm = new ymaps.Placemark([m.lat, m.lng], {
-      balloonContentHeader: `<strong>${t.title}</strong>`,
-      balloonContentBody: markerBalloonHTML(m),
+      balloonContent: content,
       hintContent: t.title,
       marker_id: m.id
-    }, markerIconFor(t.key));
+    }, { ...markerIconFor(t.key), balloonContentLayout: markerBalloonLayout, hideIconOnBalloonOpen: false });
     window.markersCollection.add(pm);
   });
 }
@@ -99,11 +102,11 @@ export async function publishMarker(){
     }
     const draft = { title: (window.els.title?.value||''), description: (window.els.desc?.value||''), author: authorName, is_anon: isAnon, created_at: new Date().toISOString(), image_url: photoData };
 
+    const draftContent = `<div class="marker-balloon__title"><strong>${t.title}</strong></div>${markerBalloonHTML(draft)}`;
     optimisticPm = new ymaps.Placemark(window.pickedPoint, {
-      balloonContentHeader: `<strong>${t.title}</strong>`,
-      balloonContentBody: markerBalloonHTML(draft),
+      balloonContent: draftContent,
       hintContent: t.title
-    }, markerIconFor(t.key));
+    }, { ...markerIconFor(t.key), balloonContentLayout: markerBalloonLayout, hideIconOnBalloonOpen: false });
     window.markersCollection.add(optimisticPm);
 
     const url = new URL(ep); url.searchParams.set("action","add_marker");
@@ -148,14 +151,14 @@ export async function publishMarker(){
   }
 }
 
-export async function confirmMarker(id){
+export async function confirmMarker(id, delta=1){
   const ep = endpoint(); if (!ep) return toast("API не настроено");
   try {
     const url = new URL(ep); url.searchParams.set("action","confirm_marker");
     const res = await fetch(url.toString(), {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ id })
+      body: JSON.stringify({ id, delta, client_id: window.tg?.initDataUnsafe?.user?.id || "" })
     });
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();

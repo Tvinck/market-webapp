@@ -1,6 +1,10 @@
 /** Маркер — Google Apps Script backend (v2.2 без setHeader) */
 const SPREADSHEET_ID = '1kthJTm6r27LFQdqL2HvlWkhWFknZgH4YpUye3AbuR0U';
 const SHEET_MARKERS  = 'markers';
+
+
+const SHEET_USERS    = 'users';
+
 const PHOTOS_FOLDER_ID = '1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU';
 
 let escapeHTML;
@@ -22,6 +26,66 @@ try {
   };
 }
 
+function withCors(out){
+  return out
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
+function doOptions(e){
+  return withCors(ContentService.createTextOutput(''));
+}
+
+function rankFor(r){
+  return r >= 50 ? 'Профи' : (r >= 10 ? 'Опытный' : 'Начинающий пользователь');
+}
+
+function ensureUserSheet(){
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sh = ss.getSheetByName(SHEET_USERS);
+  if (!sh) sh = ss.insertSheet(SHEET_USERS);
+  const header = sh.getRange(1,1,1, sh.getLastColumn() || 3).getValues()[0];
+  if (!header || header[0] !== 'client_id') {
+    sh.clear();
+    sh.getRange(1,1,1,3).setValues([[ 'client_id','rating','rank' ]]);
+  }
+  return sh;
+}
+
+function getUser(clientId){
+  if (!clientId) return { rating:0, rank: rankFor(0) };
+  const sh = ensureUserSheet();
+  const data = sh.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === clientId) {
+      const rating = Number(data[i][1] || 0);
+      const rank = data[i][2] || rankFor(rating);
+      return { rating, rank };
+    }
+  }
+  return { rating:0, rank: rankFor(0) };
+}
+
+function updateUserRating(clientId, delta){
+  if (!clientId) return { rating:0, rank: rankFor(0) };
+  const sh = ensureUserSheet();
+  const data = sh.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === clientId) {
+      let rating = Number(data[i][1] || 0) + delta;
+      if (rating < 0) rating = 0;
+      const rank = rankFor(rating);
+      sh.getRange(i+1,2).setValue(rating);
+      sh.getRange(i+1,3).setValue(rank);
+      return { rating, rank };
+    }
+  }
+  let rating = delta < 0 ? 0 : delta;
+  const rank = rankFor(rating);
+  sh.appendRow([clientId, rating, rank]);
+  return { rating, rank };
+}
 // Создать лист и заголовки (один раз)
 function bootstrap() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -29,6 +93,7 @@ function bootstrap() {
   if (!sh) sh = ss.insertSheet(SHEET_MARKERS);
   const headers = ["id","type","lat","lng","title","description","image_url","author","client_id","is_anon","created_at","expires_at","rating","confirmations"];
   sh.getRange(1,1,1,headers.length).setValues([headers]);
+  ensureUserSheet();
 }
 
 // ---- Handlers ----
@@ -42,25 +107,33 @@ function doGet(e) {
       const radius = parseInt(e.parameter.radius || '5000', 10);
       const markers = listMarkers(lat, lng, radius);
 
-      return ContentService
+      return withCors(ContentService
         .createTextOutput(JSON.stringify({ ok: true, markers }))
-        .setMimeType(ContentService.MimeType.JSON);
+        .setMimeType(ContentService.MimeType.JSON));
     }
 
     if (action === 'ping') {
-      return ContentService
+      return withCors(ContentService
         .createTextOutput(JSON.stringify({ ok: true, pong: true }))
-        .setMimeType(ContentService.MimeType.JSON);
+        .setMimeType(ContentService.MimeType.JSON));
     }
 
-    return ContentService
+    if (action === 'get_user') {
+      const clientId = String(e.parameter.client_id || '');
+      const info = getUser(clientId);
+      return withCors(ContentService
+        .createTextOutput(JSON.stringify({ ok: true, rating: info.rating, rank: info.rank }))
+        .setMimeType(ContentService.MimeType.JSON));
+    }
+
+    return withCors(ContentService
       .createTextOutput(JSON.stringify({ ok: false, error: 'unknown_action' }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON));
 
   } catch (err) {
-    return ContentService
+    return withCors(ContentService
       .createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON));
   }
 }
 
@@ -71,26 +144,26 @@ function doPost(e) {
 
     if (action === 'add_marker') {
       const id = addMarker(body);
-      return ContentService
+      return withCors(ContentService
         .createTextOutput(JSON.stringify({ ok: true, id }))
-        .setMimeType(ContentService.MimeType.JSON);
+        .setMimeType(ContentService.MimeType.JSON));
     }
 
     if (action === 'confirm_marker') {
-      const result = updateRating(String(body.id || ''), Number(body.delta || 1));
-      return ContentService
-        .createTextOutput(JSON.stringify({ ok: true, rating: result.rating, confirmations: result.confirmations }))
-        .setMimeType(ContentService.MimeType.JSON);
+      const result = updateRating(String(body.id || ''), Number(body.delta || 1), String(body.client_id || ''));
+      return withCors(ContentService
+        .createTextOutput(JSON.stringify({ ok: true, rating: result.rating, confirmations: result.confirmations, author: result.author, confirmer: result.confirmer }))
+        .setMimeType(ContentService.MimeType.JSON));
     }
 
-    return ContentService
+    return withCors(ContentService
       .createTextOutput(JSON.stringify({ ok: false, error: 'unknown_action' }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON));
 
   } catch (err) {
-    return ContentService
+    return withCors(ContentService
       .createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON));
   }
 }
 
@@ -149,6 +222,7 @@ function addMarker(data) {
     0  // confirmations
   ]);
 
+  updateUserRating(String(data.client_id || ''), 1);
   return id;
 }
 
@@ -178,7 +252,7 @@ function listMarkers(lat, lng, radiusMeters) {
   return out;
 }
 
-function updateRating(id, delta) {
+function updateRating(id, delta, confirmerId) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sh = ss.getSheetByName(SHEET_MARKERS);
   if (!sh) throw new Error('no_sheet');
@@ -190,7 +264,10 @@ function updateRating(id, delta) {
       const conf = Number(data[i][13] || 0) + (delta > 0 ? 1 : 0);
       sh.getRange(i + 1, 13).setValue(rating);
       sh.getRange(i + 1, 14).setValue(conf);
-      return { rating, confirmations: conf };
+      const authorId = String(data[i][8] || '');
+      const author = updateUserRating(authorId, delta);
+      const confirmer = updateUserRating(confirmerId, delta);
+      return { rating, confirmations: conf, author, confirmer };
     }
   }
   throw new Error('not_found');

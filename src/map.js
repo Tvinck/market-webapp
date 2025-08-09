@@ -30,6 +30,29 @@ export function markerBalloonHTML(m){
   return `<div class="marker-card">${m.title ? `<div style="font-weight:600">${escapeHTML(m.title)}</div>` : ''}${img}<div>${escapeHTML(m.description||'')}</div><div class="meta">${author}${dateStr ? ' • ' + dateStr : ''}</div><div class="meta">Рейтинг: ${rating}</div></div>`;
 }
 
+// Custom balloon layout with themed styles
+export const markerBalloonLayout = ymaps.templateLayoutFactory.createClass(
+  `<div class="marker-balloon">
+     <button class="marker-balloon__close" type="button">×</button>
+     $[properties.balloonContent]
+   </div>`, {
+    build: function(){
+      this.constructor.superclass.build.call(this);
+      this._closeHandler = this._onCloseClick.bind(this);
+      this._closeBtn = this.getParentElement().querySelector('.marker-balloon__close');
+      if (this._closeBtn) this._closeBtn.addEventListener('click', this._closeHandler);
+    },
+    clear: function(){
+      if (this._closeBtn && this._closeHandler) this._closeBtn.removeEventListener('click', this._closeHandler);
+      this.constructor.superclass.clear.call(this);
+    },
+    _onCloseClick: function(e){
+      e.preventDefault();
+      this.events.fire('userclose');
+    }
+  }
+);
+
 export function setPreset(name){
   let cfg;
   switch(name){

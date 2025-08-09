@@ -50,15 +50,25 @@ export function buildTypes(){
   });
 }
 
-export function renderProfile(){
+export async function renderProfile(){
   if (!window.els.profile) return;
   const u = window.tg?.initDataUnsafe?.user;
   const cfg = loadMapPrefs();
   const theme = loadTheme();
 
+  let rating = 0, rank = '';
+  const ep = String(window.MARKER_CONFIG?.GAS_ENDPOINT || '/server/api/marker_api.php');
+  if (u?.id && ep) {
+    try {
+      const url = new URL(ep); url.searchParams.set('action','get_user'); url.searchParams.set('client_id', u.id);
+      const res = await fetch(url.toString(), { method:'GET' });
+      if (res.ok) { const d = await res.json(); rating = Number(d.rating||0); rank = String(d.rank||''); }
+    } catch(_){ }
+  }
+
   window.els.profile.innerHTML = `
-      <div class="card"><strong>${u?.first_name||'Гость'} ${u?.last_name||''}</strong>
-        <div class="meta">@${u?.username||''}</div>
+      <div class="card"><strong>${rank ? rank + ' ' : ''}${u?.first_name||'Гость'} ${u?.last_name||''}</strong>
+        <div class="meta">@${u?.username||''} • рейтинг: ${rating}</div>
       </div>
 
       <div class="card">
@@ -133,27 +143,32 @@ export function renderProfile(){
   document.getElementById("presetReset")?.addEventListener("click", () => { setPreset("reset"); toast("Сброс настроек"); });
 
   const myMarkers = document.getElementById("myMarkers");
-  const myList = (window.__markersCache || []).filter(m => m.client_id == u?.id);
+  const cache = window.__markersCache;
   if (myMarkers){
     myMarkers.innerHTML = "";
-    if (!myList.length){
-      myMarkers.innerHTML = '<div class="placeholder">Вы ещё не добавили меток.</div>';
+    if (cache === undefined) {
+      myMarkers.innerHTML = '<div class="placeholder">Не удалось загрузить метки.</div>';
     } else {
-      myList
-        .slice()
-        .sort((a,b)=> new Date(b.created_at) - new Date(a.created_at))
-        .forEach(m => {
-          const el = document.createElement("div");
-          el.className = "card";
-          el.innerHTML = `<div><strong>${escapeHTML(m.title||'Без названия')}</strong></div>`+
-                          `<div class="meta">${new Date(m.created_at).toLocaleString()}</div>`;
-          el.addEventListener("click", () => {
-            const btn = document.querySelector('[data-tab="map"]');
-            btn?.click();
-            if (window.map) window.map.setCenter([m.lat, m.lng], 15, {duration:200});
+      const myList = (cache || []).filter(m => m.client_id == u?.id);
+      if (!myList.length){
+        myMarkers.innerHTML = '<div class="placeholder">Вы ещё не добавили меток.</div>';
+      } else {
+        myList
+          .slice()
+          .sort((a,b)=> new Date(b.created_at) - new Date(a.created_at))
+          .forEach(m => {
+            const el = document.createElement("div");
+            el.className = "card";
+            el.innerHTML = `<div><strong>${escapeHTML(m.title||'Без названия')}</strong></div>`+
+                            `<div class="meta">${new Date(m.created_at).toLocaleString()}</div>`;
+            el.addEventListener("click", () => {
+              const btn = document.querySelector('[data-tab="map"]');
+              btn?.click();
+              if (window.map) window.map.setCenter([m.lat, m.lng], 15, {duration:200});
+            });
+            myMarkers.appendChild(el);
           });
-          myMarkers.appendChild(el);
-        });
+      }
     }
   }
 
