@@ -1,14 +1,21 @@
 import { markerIconFor, markerBalloonHTML, markerBalloonLayout } from './map.js';
 import { toast } from './ui.js';
 
-// All API calls go through a local proxy by default
+const EXPECTED_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+
+// Return configured GAS endpoint or empty string if missing
 export function endpoint(){
-  return String(window.MARKER_CONFIG?.GAS_ENDPOINT || '/server/api/marker_api.php');
+  const ep = window.MARKER_CONFIG?.GAS_ENDPOINT;
+  if (!ep || ep.includes('YOUR_DEPLOYMENT_ID')){
+    console.warn(`GAS_ENDPOINT is not configured. Expected something like ${EXPECTED_URL}`);
+    return '';
+  }
+  return String(ep);
 }
 
 export async function fetchMarkers(){
   if (!window.map) return;
-  const ep = endpoint(); if (!ep) return toast("API не настроено");
+  const ep = endpoint(); if (!ep) return toast(`API не настроено. Укажите GAS_ENDPOINT, например: ${EXPECTED_URL}`);
   const center = window.map.getCenter(), radius = window.MARKER_CONFIG.DEFAULT_RADIUS_METERS;
   const url = new URL(ep); url.searchParams.set("action","list_markers"); url.searchParams.set("lat",center[0]); url.searchParams.set("lng",center[1]); url.searchParams.set("radius",radius);
   try {
@@ -57,7 +64,7 @@ export function hasDuplicateNearby(type, coords, meters=25, minutes=15){
 }
 
 export async function publishMarker(){
-  const ep = endpoint(); if (!ep) return toast("API не настроено");
+  const ep = endpoint(); if (!ep) return toast(`API не настроено. Укажите GAS_ENDPOINT, например: ${EXPECTED_URL}`);
   if (!window.selectedType) { toast("Выберите тип метки"); return; }
 
   if (!window.pickedPoint) {
@@ -152,7 +159,7 @@ export async function publishMarker(){
 }
 
 export async function confirmMarker(id, delta=1){
-  const ep = endpoint(); if (!ep) return toast("API не настроено");
+  const ep = endpoint(); if (!ep) return toast(`API не настроено. Укажите GAS_ENDPOINT, например: ${EXPECTED_URL}`);
   try {
     const url = new URL(ep); url.searchParams.set("action","confirm_marker");
     const res = await fetch(url.toString(), {

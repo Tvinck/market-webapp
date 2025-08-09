@@ -120,17 +120,11 @@
 
 <script>
   window.MARKER_CONFIG = {
-    // Client requests go to the local PHP proxy which forwards to the
-    // actual Google Apps Script endpoint configured on the server.
-    GAS_ENDPOINT: "/server/api/marker_api.php",
-
-  <script>
-    window.MARKER_CONFIG = {
-    GAS_ENDPOINT: "https://script.google.com/macros/s/AKfycbyAl3VHgOygkgL6wt9OaG0_xMSZRg0j7kmfBlBeTlMVA6TkpwYAN0j61XggDLYwLqS0/exec",
-
+    // Replace GAS_ENDPOINT with your Google Apps Script URL or proxy path.
+    GAS_ENDPOINT: "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec",
     DEFAULT_RADIUS_METERS: 5000
   };
-  </script>
+</script>
 <script type="module" src="app.js?v=3.9"></script>
 </body>
 </html>
