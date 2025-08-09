@@ -75,8 +75,8 @@ export async function renderProfile(){
   }
 
   window.els.profile.innerHTML = `
-      <div class="card"><strong>${prefix ? escapeHTML(prefix) + ' ' : ''}${u?.first_name||'Гость'} ${u?.last_name||''}</strong>
-        <div class="meta">@${u?.username||''}</div>
+      <div class="card"><strong>${prefix ? escapeHTML(prefix) + ' ' : ''}${escapeHTML(u?.first_name || 'Гость')} ${escapeHTML(u?.last_name || '')}</strong>
+        <div class="meta">@${escapeHTML(u?.username || '')}</div>
         <div class="meta">Рейтинг: ${rating}</div>
         <div class="meta">Создано меток: ${markers}</div>
       </div>
