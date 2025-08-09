@@ -24,7 +24,7 @@ export async function fetchMarkers(){
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     renderMarkers(Array.isArray(data?.markers) ? data.markers : []);
-    window.__markersCache = data.markers || [];
+    window.__markersCache = Array.isArray(data?.markers) ? data.markers : [];
   } catch(e){
     console.error("fetchMarkers", e);
     toast("Не удалось загрузить метки: " + (e?.message || e));
