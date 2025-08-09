@@ -6,8 +6,8 @@ const SHEET_MARKERS  = 'markers';
 const SHEET_USERS    = 'users';
 
 const PHOTOS_FOLDER_ID = '1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU';
-// escapeHTML is shared with the frontend and lives in src/utils.js
-const { escapeHTML } = require('./src/utils.js');
+// escapeHTML and haversine are shared with the frontend and live in src/utils.js
+const { escapeHTML, haversine } = require('./src/utils.js');
 
 function withCors(out){
   out.setHeader('Access-Control-Allow-Origin', '*');
@@ -244,7 +244,7 @@ function listMarkers(lat, lng, radiusMeters) {
     if (!la || !ln) continue;
     if (expires && expires < now) continue; // истёкшие скрываем
 
-    const dkm = haversine(lat, lng, la, ln);
+    const dkm = haversine([lat, lng], [la, ln]) / 1000;
     if (dkm * 1000 <= radiusMeters) {
       out.push({
         id, type, lat: la, lng: ln,
@@ -277,12 +277,3 @@ function updateRating(id, delta, confirmerId) {
   throw new Error('not_found');
 }
 
-// расстояние между точками (км)
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371; // km
-  const toRad = x => x * Math.PI / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-  return 2 * R * Math.asin(Math.sqrt(a));
-}

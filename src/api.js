@@ -1,5 +1,6 @@
 import { markerIconFor, markerBalloonHTML, markerBalloonLayout } from './map.js';
 import { toast } from './ui.js';
+import { haversine } from './utils.js';
 
 const EXPECTED_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
 
@@ -43,14 +44,6 @@ export function renderMarkers(items){
     }, { ...markerIconFor(t.key), balloonContentLayout: markerBalloonLayout, hideIconOnBalloonOpen: false });
     window.markersCollection.add(pm);
   });
-}
-
-function haversine(a, b){
-  const R = 6371000; const toRad = d => d*Math.PI/180;
-  const dLat = toRad(b[0]-a[0]); const dLng = toRad(b[1]-a[1]);
-  const s1 = Math.sin(dLat/2), s2 = Math.sin(dLng/2);
-  const c = Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]));
-  return 2*R*Math.asin(Math.sqrt(s1*s1 + c*s2*s2));
 }
 
 export function hasDuplicateNearby(type, coords, meters=25, minutes=15){
