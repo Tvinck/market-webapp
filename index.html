@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Маркер — WebApp</title>
+<link rel="stylesheet" href="styles.css?v=3.9" />
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta name="ya-maps-key" content="79bead93-8713-4de9-9dac-484d3aa0980d" />
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <span class="title">Маркер</span>
+    </div>
+    <div class="hdr-tools">
+      <button id="geoBtn" class="icon-btn" title="Моё местоположение" aria-label="Моё местоположение">◎</button>
+      <div id="miniZoom" class="miniZoom hidden">
+        <button id="zoomIn" class="icon-btn">＋</button>
+        <button id="zoomOut" class="icon-btn">－</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="view">
+    <section id="tab-map" class="tab active" aria-label="Карта">
+      <div id="map" class="map"></div>
+      <button id="fabAdd" class="fab" aria-label="Добавить метку">+</button>
+      <button id="confirm" class="fab hidden" style="bottom:150px" aria-label="Подтвердить метку">✓</button>
+    </section>
+
+    <section id="tab-feed" class="tab" aria-label="События">
+      <div id="feed" class="feed"></div>
+    </section>
+
+    <section id="tab-radar" class="tab" aria-label="Радар">
+      <div class="placeholder">
+        <h3>Радар</h3>
+        <p>Здесь будут события в радиусе 5 км в реальном времени.</p>
+      </div>
+    </section>
+
+    <section id="tab-profile" class="tab" aria-label="Профиль">
+      <div id="profile" class="profile"></div>
+    </section>
+  </main>
+
+  <nav class="bottomnav">
+    <button data-tab="map" class="navbtn active">Карта</button>
+    <button data-tab="feed" class="navbtn">События</button>
+    <button data-tab="radar" class="navbtn">Радар</button>
+    <button data-tab="profile" class="navbtn">Профиль</button>
+  </nav>
+</div>
+
+<!-- Onboarding -->
+<div id="onb" class="onb hidden">
+  <div class="onb-card">
+    <div class="onb-slide">
+      <h2>Добро пожаловать в Маркер</h2>
+      <p>Живая карта дорожных событий от людей рядом.</p>
+      <button class="primary onb-next">Далее</button>
+    </div>
+    <div class="onb-slide hidden">
+      <h2>Ставьте метки</h2>
+      <p>Нажмите «+», выберите тип и коснитесь карты.</p>
+      <button class="primary onb-next">Далее</button>
+    </div>
+    <div class="onb-slide hidden">
+      <h2>Подтверждайте</h2>
+      <p>Подтверждайте метки других — повышайте рейтинг.</p>
+      <button class="primary onb-next">Далее</button>
+    </div>
+    <div class="onb-slide hidden">
+      <h2>Готово</h2>
+      <p>Включите геолокацию — и поехали!</p>
+      <button class="primary onb-done">Начать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Add -->
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div class="grip"></div>
+    <h3>Новая метка</h3>
+    <div id="types" class="types"></div>
+    <label class="lbl">Заголовок</label>
+    <input id="title" maxlength="80" placeholder="Заголовок" />
+    <label class="lbl">Комментарий</label>
+    <textarea id="desc" maxlength="255" placeholder="Коротко: что происходит?"></textarea>
+    <label class="lbl">Фото <span class="muted">(до 2 МБ, только изображения)</span></label>
+    <input type="file" id="photo" accept="image/*" />
+    <div class="row">
+      <label class="lbl">Автоистечение</label>
+      <input id="dur" type="number" min="5" max="720" value="120"/> <span class="muted">мин</span>
+    </div>
+
+    <div class="row between">
+      <div class="row" style="gap:8px">
+        <button id="useHere" class="ghost">По центру карты</button>
+        <button id="pickOnMap" class="ghost">Выбрать на карте</button>
+      </div>
+      <span id="coords" class="muted">Координаты не выбраны</span>
+    </div>
+
+    <label class="row" style="margin-top:8px"><input type="checkbox" id="anon"/> Отправить анонимно</label>
+
+    <div class="actions">
+      <button id="cancel" class="ghost">Отмена</button>
+      <button id="publish" class="primary" disabled>Опубликовать</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+
+<script>
+  window.MARKER_CONFIG = {
+    // Replace GAS_ENDPOINT with your Google Apps Script URL or proxy path.
+    GAS_ENDPOINT: "https://script.google.com/macros/s/AKfycbz6w3ywFsYJHY3Q9t66t4BbcJKYk6GDNY_oiAV-wIN6N6ZRi496EEtBzxNPsPArew8ldA/exec",
+    YA_MAPS_KEY: "79bead93-8713-4de9-9dac-484d3aa0980d",
+    DEFAULT_RADIUS_METERS: 5000
+  };
+</script>
+<script type="module" src="app.js?v=3.9"></script>
+</body>
+</html>
