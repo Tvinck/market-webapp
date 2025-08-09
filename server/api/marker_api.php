@@ -33,5 +33,20 @@ $context = stream_context_create($opts);
 $resp = @file_get_contents($url, false, $context);
 
 header('Content-Type: application/json; charset=UTF-8');
-http_response_code(200);
-echo $resp ? $resp : '{"ok":false,"error":"proxy_failed"}';
+if ($resp === false) {
+  $err = error_get_last();
+  http_response_code(502);
+  echo json_encode([
+    'ok' => false,
+    'error' => $err['message'] ?? 'network_error'
+  ], JSON_UNESCAPED_UNICODE);
+  exit;
+}
+
+$status = 200;
+if (isset($http_response_header[0]) &&
+    preg_match('/^HTTP\/\S+\s+(\d+)/', $http_response_header[0], $m)) {
+  $status = (int)$m[1];
+}
+http_response_code($status);
+echo $resp;
