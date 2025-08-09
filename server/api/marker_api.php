@@ -34,21 +34,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $context = stream_context_create($opts);
 $resp = @file_get_contents($url, false, $context);
 
-header('Content-Type: application/json; charset=UTF-8');
-if ($resp === false) {
-  $err = error_get_last();
-  http_response_code(502);
-  echo json_encode([
-    'ok' => false,
-    'error' => $err['message'] ?? 'network_error'
-  ], JSON_UNESCAPED_UNICODE);
-  exit;
-}
-
 $status = 200;
 if (isset($http_response_header[0]) &&
     preg_match('/^HTTP\/\S+\s+(\d+)/', $http_response_header[0], $m)) {
   $status = (int)$m[1];
 }
+
+header('Content-Type: application/json; charset=UTF-8');
+if ($resp === false) {
+  $err = error_get_last();
+  http_response_code(502);
+  if ($err && isset($err['message'])) {
+    error_log($err['message']);
+  }
+  echo json_encode([
+    'ok' => false,
+    'error' => 'proxy_failed'
+  ], JSON_UNESCAPED_UNICODE);
+  exit;
+}
+
 http_response_code($status);
+if ($status >= 400) {
+  error_log($resp);
+}
 echo $resp;
