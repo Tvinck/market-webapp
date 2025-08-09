@@ -6,57 +6,63 @@
 - В профиле появился раздел «Мои метки» с карточками ваших добавленных точек.
 - Введена система рейтинга пользователей и уровней: рейтинг растёт за публикации и подтверждения меток.
 
+## Получение ключей
+
+Перед запуском потребуется:
+
+1. Ключ [Yandex Maps API](https://developer.tech.yandex.ru/).
+2. URL развёрнутого Google Apps Script.
+3. ID папки Google Drive для загрузки фотографий.
+
+Полученные значения храните локально и **не публикуйте их в публичных VCS**.
+
 ## Установка
 
 1. Установите PHP и клонируйте репозиторий.
-2. Получите ключ [Yandex Maps API](https://developer.tech.yandex.ru/) и укажите его:
+2. Укажите ключ Yandex Maps API:
    - через поле `YA_MAPS_KEY` объекта `window.MARKER_CONFIG` в `index.html`,
    - либо добавив мета‑тег `<meta name="ya-maps-key" content="ВАШ_КЛЮЧ">` в `<head>`.
-   Скрипт карт загрузится автоматически с указанным ключом.
-3. Разверните Google Apps Script:
-   - откройте <https://script.google.com/>, создайте новый проект и вставьте содержимое `code.gs` (значение `PHOTOS_FOLDER_ID` уже указано: `1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU`);
-   - при необходимости измените `SPREADSHEET_ID`;
-   - через меню **Deploy → New deployment → Web app** получите URL веб‑приложения.
-4. В файле `index.html` замените значение `window.MARKER_CONFIG.GAS_ENDPOINT` на полученный URL веб‑приложения или путь к прокси, например `/server/api/marker_api.php`.
-5. В `server/config.php` уже заданы `PHOTOS_FOLDER_ID` и список `MARKER_ALLOWED_ORIGINS` (`https://www.bazzarproject.ru`); замените при необходимости или задайте через одноимённые переменные окружения.
-6. Запустите сервер, например: `php -S localhost:8000 -t server`.
+3. В `index.html` замените `window.MARKER_CONFIG.GAS_ENDPOINT` на URL веб‑приложения Google Apps Script или путь к прокси, например `/server/api/marker_api.php`.
+4. В `server/config.php` задайте `PHOTOS_FOLDER_ID` и список `MARKER_ALLOWED_ORIGINS` или используйте переменные окружения (см. ниже).
+5. Запустите сервер: `php -S localhost:8000 -t server`.
 
+## Настройка переменных окружения
 
-### Примеры конфигурации и деплоя
-
-`server/config.php`:
-
-```php
-<?php
-return [
-    'gas_endpoint' => 'https://script.google.com/macros/s/AKfycbwhBNyiokWlf6ifcD7sG0oOhU_xFIQrGBW8ZBDpZa_PmyGdYlQ0HRN0Zqgrn2em6CgSWA/exec',
-    'photos_folder_id' => '1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU',
-    'allowed_origins' => ['https://www.bazzarproject.ru']
-];
-```
-
-Команды:
-
-```
+```bash
 export MARKER_GAS_ENDPOINT="https://script.google.com/macros/s/AKfycbwhBNyiokWlf6ifcD7sG0oOhU_xFIQrGBW8ZBDpZa_PmyGdYlQ0HRN0Zqgrn2em6CgSWA/exec"
 export PHOTOS_FOLDER_ID="1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU"
-export MARKER_ALLOWED_ORIGINS="https://www.bazzarproject.ru"
-    'gas_endpoint' => 'https://script.google.com/macros/s/AKfycbyAl3VHgOygkgL6wt9OaG0_xMSZRg0j7kmfBlBeTlMVA6TkpwYAN0j61XggDLYwLqS0/exec',
-    'photos_folder_id' => '1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU',
-    'allowed_origins' => ['https://www.bazzarproject.ru','https://bazzarproject.ru','http://localhost:8000']
-];
-```
-
-Команды:
-
-```
-export MARKER_GAS_ENDPOINT="https://script.google.com/macros/s/AKfycbyAl3VHgOygkgL6wt9OaG0_xMSZRg0j7kmfBlBeTlMVA6TkpwYAN0j61XggDLYwLqS0/exec"
-export PHOTOS_FOLDER_ID="1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU"
 export MARKER_ALLOWED_ORIGINS="https://www.bazzarproject.ru,https://bazzarproject.ru,http://localhost:8000"
-php -S localhost:8000 -t server
-RSYNC_DEST=user@host:/var/www/marker-webapp ./deploy.sh
 ```
 
+`MARKER_GAS_ENDPOINT` — URL Google Apps Script или локального прокси.  
+`PHOTOS_FOLDER_ID` — ID папки Google Drive.  
+`MARKER_ALLOWED_ORIGINS` — разрешённые Origin (через запятую).
+
+## Локальный запуск и тестирование
+
+1. Запустите PHP‑сервер:
+
+   ```bash
+   php -S localhost:8000 -t server
+   ```
+
+2. Проверьте работу прокси:
+
+   ```bash
+   curl http://localhost:8000/api/marker_api.php?action=ping
+   ```
+
+   Ожидаемый ответ — `{"ok":true,"pong":true}`.
+
+3. Опубликуйте тестовую метку:
+
+   ```bash
+   curl -X POST http://localhost:8000/api/marker_api.php?action=add_marker \\
+     -H "Content-Type: application/json" \\
+     -d '{"lat":55.75,"lng":37.61,"title":"Test","description":"Demo","author":"local","client_id":"debug"}'
+   ```
+
+   В ответ должно вернуться `{"ok":true,"id":"m_..."}`.
 ## Серверное API
 
 PHP‑прокси для Google Apps Script теперь расположен в `server/api/marker_api.php`.
