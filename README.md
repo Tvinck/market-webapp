@@ -14,12 +14,9 @@
    - откройте <https://script.google.com/>, создайте новый проект и вставьте содержимое `code.gs` (значение `PHOTOS_FOLDER_ID` уже указано: `1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU`);
    - при необходимости измените `SPREADSHEET_ID`;
    - через меню **Deploy → New deployment → Web app** получите URL веб‑приложения.
-4. В `window.MARKER_CONFIG.GAS_ENDPOINT` оставьте `/server/api/marker_api.php` — клиент будет обращаться к локальному PHP‑прокси.
-5. Настоящий URL Google Apps Script указывается в `server/config.php` (ключ `gas_endpoint` или переменная окружения `MARKER_GAS_ENDPOINT`).
-6. В `server/config.php` уже заданы `PHOTOS_FOLDER_ID` и список `MARKER_ALLOWED_ORIGINS` (`https://www.bazzarproject.ru`); замените при необходимости или задайте через одноимённые переменные окружения.
-7. Запустите сервер, например: `php -S localhost:8000 -t server`.
-4. В `window.MARKER_CONFIG.GAS_ENDPOINT` укажите путь к веб-приложению Google Apps Script или прокси, например `https://script.google.com/macros/s/AKfycbyAl3VHgOygkgL6wt9OaG0_xMSZRg0j7kmfBlBeTlMVA6TkpwYAN0j61XggDLYwLqS0/exec` или `/server/api/marker_api.php` (его можно задать и через `server/config.php`).
-5. В `server/config.php` уже заданы `PHOTOS_FOLDER_ID` и список `MARKER_ALLOWED_ORIGINS` (`https://www.bazzarproject.ru,https://bazzarproject.ru,http://localhost:8000`); замените при необходимости или задайте через одноимённые переменные окружения.
+4. В файле `index.html` замените значение `window.MARKER_CONFIG.GAS_ENDPOINT` на полученный URL веб‑приложения или путь к прокси, например `/server/api/marker_api.php`.
+5. В `server/config.php` уже заданы `PHOTOS_FOLDER_ID` и список `MARKER_ALLOWED_ORIGINS` (`https://www.bazzarproject.ru`); замените при необходимости или задайте через одноимённые переменные окружения.
+6. Запустите сервер, например: `php -S localhost:8000 -t server`.
 
 
 ### Примеры конфигурации и деплоя
