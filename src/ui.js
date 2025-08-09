@@ -4,23 +4,31 @@ import { escapeHTML } from './utils.js';
 
 export function toast(msg, t=2200){ if(!window.els.toast) return; window.els.toast.textContent = msg; window.els.toast.classList.remove("hidden"); setTimeout(()=>window.els.toast.classList.add("hidden"), t); }
 
-export function openModal(){
-  if(!window.els.modal) return;
-  window.pickingMode = false;
-  window.pickedPoint = null;
-  window.isPublishing = false;
+export function resetMarkerForm(){
   window.selectedType = null;
   if(window.els.title) window.els.title.value = "";
   if(window.els.desc) window.els.desc.value = "";
   if(window.els.photo) window.els.photo.value = "";
   if(window.els.dur) window.els.dur.value = window.els.dur.defaultValue || 120;
-  window.els.modal.classList.remove("hidden");
-  if(window.els.coords) window.els.coords.textContent = "Координаты не выбраны";
-  if(window.els.publish) window.els.publish.disabled = true;
   if(window.els.types) window.els.types.querySelectorAll(".type").forEach(x=>x.classList.remove("selected"));
 }
 
-export function closeModal(){ if(!window.els.modal) return; window.els.modal.classList.add("hidden"); window.selectedType=null; if(window.els.types) window.els.types.querySelectorAll(".type").forEach(x=>x.classList.remove("selected")); if(window.els.title) window.els.title.value = ""; if(window.els.desc) window.els.desc.value = ""; if(window.els.photo) window.els.photo.value = ""; if(window.els.dur) window.els.dur.value = window.els.dur.defaultValue || 120; }
+export function openModal(){
+  if(!window.els.modal) return;
+  window.pickingMode = false;
+  window.pickedPoint = null;
+  window.isPublishing = false;
+  resetMarkerForm();
+  window.els.modal.classList.remove("hidden");
+  if(window.els.coords) window.els.coords.textContent = "Координаты не выбраны";
+  if(window.els.publish) window.els.publish.disabled = true;
+}
+
+export function closeModal(){
+  if(!window.els.modal) return;
+  window.els.modal.classList.add("hidden");
+  resetMarkerForm();
+}
 
 export function showOnbIfNeeded(){
   try { if (localStorage.getItem("onboarded_v2")) return; } catch(_){}
