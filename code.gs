@@ -1,7 +1,7 @@
 /** Маркер — Google Apps Script backend (v2.2 без setHeader) */
 const SPREADSHEET_ID = '1kthJTm6r27LFQdqL2HvlWkhWFknZgH4YpUye3AbuR0U';
 const SHEET_MARKERS  = 'markers';
-const PHOTOS_FOLDER_ID = 'YOUR_PHOTOS_FOLDER_ID';
+const PHOTOS_FOLDER_ID = '1CDe78tk-Urh35r0GxMHPVDPt9I-dvvrU';
 
 let escapeHTML;
 try {
